@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch>
+        <node pkg="detector" name="real_cam_node" type="real_cam2ros.py" output="screen"> </node>
+</launch>
