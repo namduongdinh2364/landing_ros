@@ -1,0 +1,11 @@
+<launch>
+  <arg name="launch_prefix" default="" />
+  <arg name="node_namespace" default="cctag_detector_node" />
+  <arg name="camera_name" default="/camera"/>
+  <arg name="image_topic" default="color/image_raw" />
+
+  <node pkg="cctag_ros" type="cctag_ros_node" name="$(arg node_namespace)" clear_params="true" output="screen" launch-prefix="$(arg launch_prefix)" >
+    <param name="marker_size" value="0.4" />
+  </node>
+  <!-- <node name="rviz" pkg="rviz" type="rviz" args="-d $(find detector)/rviz/urdf.rviz" required="true"/> -->
+</launch>
