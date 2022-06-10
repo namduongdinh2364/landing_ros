@@ -1,0 +1,18 @@
+[submodule "mavros_controllers"]
+	path = src/mavros_controllers
+	url = https://github.com/Jaeyoung-Lim/mavros_controllers.git
+[submodule "mav_trajectory_generation"]
+	path = src/mav_trajectory_generation
+	url = https://github.com/ethz-asl/mav_trajectory_generation.git
+[submodule "src/apriltag_ros"]
+	path = src/apriltag_ros
+	url = https://github.com/AprilRobotics/apriltag_ros.git
+[submodule "src/mav_comm"]
+	path = src/mav_comm
+	url = https://github.com/ethz-asl/mav_comm.git
+[submodule "src/apriltag"]
+	path = src/apriltag
+	url = https://github.com/AprilRobotics/apriltag.git
+[submodule "src/aruco_ros"]
+	path = src/aruco_ros
+	url = https://github.com/pal-robotics/aruco_ros.git
