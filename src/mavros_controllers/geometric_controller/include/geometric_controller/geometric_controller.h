@@ -124,9 +124,10 @@ class geometricCtrl {
   double norm_thrust_const_, norm_thrust_offset_;
   double max_fb_acc_;
   double dx_, dy_, dz_;
+  bool landing_detec_;
 
   mavros_msgs::State current_state_;
-  mavros_msgs::SetMode offb_set_mode_;
+  mavros_msgs::SetMode offb_set_mode_, land_set_mode_;
   mavros_msgs::CommandBool arm_cmd_;
   std::vector<geometry_msgs::PoseStamped> posehistory_vector_;
   MAV_STATE companion_state_ = MAV_STATE::MAV_STATE_ACTIVE;

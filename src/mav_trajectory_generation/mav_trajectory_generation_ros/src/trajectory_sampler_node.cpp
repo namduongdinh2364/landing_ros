@@ -57,8 +57,8 @@ void TrajectorySamplerNode::pathSegmentsCallback(
     ROS_WARN("Trajectory sampler: received empty waypoint message");
     return;
   } else {
-    ROS_INFO("Trajectory sampler: received %lu waypoints",
-             segments_message.segments.size());
+    // ROS_INFO("Trajectory sampler: received %lu waypoints",
+    //          segments_message.segments.size());
   }
 
     bool success = mav_trajectory_generation::polynomialTrajectoryMsgToTrajectory(
@@ -75,8 +75,8 @@ void TrajectorySamplerNode::pathSegments4DCallback(
     ROS_WARN("Trajectory sampler: received empty waypoint message");
     return;
   } else {
-    ROS_INFO("Trajectory sampler: received %lu waypoints",
-             segments_message.segments.size());
+    // ROS_INFO("Trajectory sampler: received %lu waypoints",
+    //          segments_message.segments.size());
   }
 
     bool success = mav_trajectory_generation::polynomialTrajectoryMsgToTrajectory(

@@ -78,6 +78,7 @@ class trajectoryPublisher {
   ros::Subscriber motionselectorSub_;
   ros::Subscriber mavposeSub_;
   ros::Subscriber mavtwistSub_;
+  ros::Subscriber cmddesposeSub_;
   ros::ServiceServer trajtriggerServ_;
   ros::Timer trajloop_timer_;
   ros::Timer refloop_timer_;
@@ -90,6 +91,7 @@ class trajectoryPublisher {
   Eigen::Vector3d p_targ, v_targ, a_targ;
   Eigen::Vector3d p_mav_, v_mav_;
   Eigen::Vector3d shape_origin_, shape_axis_;
+  Eigen::Vector3d point_des;
   double shape_omega_ = 0;
   double theta_ = 0.0;
   double controlUpdate_dt_;
@@ -121,6 +123,7 @@ class trajectoryPublisher {
   void motionselectorCallback(const std_msgs::Int32& selector);
   void mavposeCallback(const geometry_msgs::PoseStamped& msg);
   void mavtwistCallback(const geometry_msgs::TwistStamped& msg);
+  void cmdposeCallback(const geometry_msgs::PoseStamped& msg);
 };
 
 #endif

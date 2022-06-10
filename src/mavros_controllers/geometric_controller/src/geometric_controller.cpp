@@ -50,6 +50,7 @@ geometricCtrl::geometricCtrl(const ros::NodeHandle &nh, const ros::NodeHandle &n
       ctrl_enable_(true),
       landing_commanded_(false),
       feedthrough_enable_(false),
+      landing_detec_(false),
       node_state(WAITING_FOR_HOME_POSE) {
   referenceSub_ =
       nh_.subscribe("reference/setpoint", 1, &geometricCtrl::targetCallback, this, ros::TransportHints().tcpNoDelay());
@@ -65,7 +66,7 @@ geometricCtrl::geometricCtrl(const ros::NodeHandle &nh, const ros::NodeHandle &n
                               ros::TransportHints().tcpNoDelay());
   mavtwistSub_ = nh_.subscribe("mavros/local_position/velocity_local", 1, &geometricCtrl::mavtwistCallback, this,
                                ros::TransportHints().tcpNoDelay());
-  ctrltriggerServ_ = nh_.advertiseService("trigger_rlcontroller", &geometricCtrl::ctrltriggerCallback, this);
+  ctrltriggerServ_ = nh_.advertiseService("tigger_rlcontroller", &geometricCtrl::ctrltriggerCallback, this);
   cmdloop_timer_ = nh_.createTimer(ros::Duration(0.01), &geometricCtrl::cmdloopCallback,
                                    this);  // Define timer for constant loop rate
   statusloop_timer_ = nh_.createTimer(ros::Duration(1), &geometricCtrl::statusloopCallback,
@@ -101,7 +102,7 @@ geometricCtrl::geometricCtrl(const ros::NodeHandle &nh, const ros::NodeHandle &n
   nh_private_.param<int>("posehistory_window", posehistory_window_, 200);
   nh_private_.param<double>("init_pos_x", initTargetPos_x_, 0.0);
   nh_private_.param<double>("init_pos_y", initTargetPos_y_, 0.0);
-  nh_private_.param<double>("init_pos_z", initTargetPos_z_, 2.0);
+  nh_private_.param<double>("init_pos_z", initTargetPos_z_, 8.0);
 
   targetPos_ << initTargetPos_x_, initTargetPos_y_, initTargetPos_z_;  // Initial Position
   targetVel_ << 0.0, 0.0, 0.0;
@@ -219,6 +220,7 @@ void geometricCtrl::mavtwistCallback(const geometry_msgs::TwistStamped &msg) {
 
 bool geometricCtrl::landCallback(std_srvs::SetBool::Request &request, std_srvs::SetBool::Response &response) {
   node_state = LANDING;
+  landing_detec_ = true;
   return true;
 }
 
@@ -250,13 +252,19 @@ void geometricCtrl::cmdloopCallback(const ros::TimerEvent &event) {
       landingmsg.header.stamp = ros::Time::now();
       landingmsg.pose = home_pose_;
       landingmsg.pose.position.z = landingmsg.pose.position.z + 1.0;
-      target_pose_pub_.publish(landingmsg);
+      // target_pose_pub_.publish(landingmsg);
       node_state = LANDED;
       ros::spinOnce();
       break;
     }
     case LANDED:
       ROS_INFO("Landed. Please set to position control and disarm.");
+        if(current_state_.mode != "AUTO.LAND") {
+          land_set_mode_.request.custom_mode = "AUTO.LAND";
+          if(set_mode_client_.call(land_set_mode_) && land_set_mode_.response.mode_sent) {
+            ROS_INFO("AUTO LANDING MODE is required");
+        }
+      }
       cmdloop_timer_.stop();
       break;
   }
@@ -265,9 +273,9 @@ void geometricCtrl::cmdloopCallback(const ros::TimerEvent &event) {
 void geometricCtrl::mavstateCallback(const mavros_msgs::State::ConstPtr &msg) { current_state_ = *msg; }
 
 void geometricCtrl::statusloopCallback(const ros::TimerEvent &event) {
-  if (sim_enable_) {
+  if (sim_enable_ && !landing_detec_) {
     // Enable OFFBoard mode and arm automatically
-    // This will only run if the vehicle is simulated
+    // This is only run if the vehicle is simulated
     arm_cmd_.request.value = true;
     offb_set_mode_.request.custom_mode = "OFFBOARD";
     if (current_state_.mode != "OFFBOARD" && (ros::Time::now() - last_request_ > ros::Duration(5.0))) {
@@ -496,17 +504,17 @@ Eigen::Vector4d geometricCtrl::geometric_attcontroller(const Eigen::Vector4d &re
   // Geometric attitude controller
   // Attitude error is defined as in Lee, Taeyoung, Melvin Leok, and N. Harris McClamroch. "Geometric tracking control
   // of a quadrotor UAV on SE (3)." 49th IEEE conference on decision and control (CDC). IEEE, 2010.
-  // The original paper inputs moment commands, but for offboard control, angular rate commands are sent
+  // The original paper inputs moment commands, but for offboard control angular rate commands are sent
 
   Eigen::Vector4d ratecmd;
-  Eigen::Matrix3d rotmat;    // Rotation matrix of current attitude
+  Eigen::Matrix3d rotmat;    // Rotation matrix of current atttitude
   Eigen::Matrix3d rotmat_d;  // Rotation matrix of desired attitude
   Eigen::Vector3d error_att;
 
   rotmat = quat2RotMatrix(curr_att);
   rotmat_d = quat2RotMatrix(ref_att);
 
-  error_att = 0.5 * matrix_hat_inv(rotmat_d.transpose() * rotmat - rotmat.transpose() * rotmat_d);
+  error_att = 0.5 * matrix_hat_inv(rotmat_d.transpose() * rotmat - rotmat.transpose() * rotmat);
   ratecmd.head(3) = (2.0 / attctrl_tau_) * error_att;
   rotmat = quat2RotMatrix(mavAtt_);
   const Eigen::Vector3d zb = rotmat.col(2);

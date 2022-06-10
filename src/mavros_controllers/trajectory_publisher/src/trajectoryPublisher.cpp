@@ -54,9 +54,11 @@ trajectoryPublisher::trajectoryPublisher(const ros::NodeHandle& nh, const ros::N
                               ros::TransportHints().tcpNoDelay());
   mavtwistSub_ = nh_.subscribe("mavros/local_position/velocity", 1, &trajectoryPublisher::mavtwistCallback, this,
                                ros::TransportHints().tcpNoDelay());
+  cmddesposeSub_ = nh_.subscribe("cmd/set_desposition/local", 1, &trajectoryPublisher::cmdposeCallback, this,
+                              ros::TransportHints().tcpNoDelay());
 
   trajloop_timer_ = nh_.createTimer(ros::Duration(0.1), &trajectoryPublisher::loopCallback, this);
-  refloop_timer_ = nh_.createTimer(ros::Duration(0.01), &trajectoryPublisher::refCallback, this);
+  refloop_timer_ = nh_.createTimer(ros::Duration(0.2), &trajectoryPublisher::refCallback, this);
 
   trajtriggerServ_ = nh_.advertiseService("start", &trajectoryPublisher::triggerCallback, this);
 
@@ -265,4 +267,13 @@ void trajectoryPublisher::mavtwistCallback(const geometry_msgs::TwistStamped& ms
   v_mav_(1) = msg.twist.linear.y;
   v_mav_(2) = msg.twist.linear.z;
   updatePrimitives();
+}
+
+void trajectoryPublisher::cmdposeCallback(const geometry_msgs::PoseStamped& msg) {
+  point_des << msg.pose.position.x, msg.pose.position.y, msg.pose.position.z;
+
+  // cout<< "Marker2NEU : " << point_des[0] <<'\t'<< point_des[1] << '\t' << point_des[2] << endl;
+  // cout << "===================================================" << endl;
+  for (int i = 0; i < motionPrimitives_.size(); i++)
+    motionPrimitives_.at(i)->initPrimitives(point_des, shape_axis_, shape_omega_);
 }

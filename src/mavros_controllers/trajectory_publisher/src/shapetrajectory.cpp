@@ -94,6 +94,20 @@ Eigen::Vector3d shapetrajectory::getPosition(double time) {
 
       position = traj_origin_;
       break;
+
+    case TRAJ_LINE:
+      position = traj_origin_;
+      // Eigen::Vector3d vtcp, vtmarker;
+      // vtmarker << 0.0, 0.0, 0.0;
+      // vtcp = traj_origin_ - vtmarker;
+      // position = traj_origin_ + (vtcp * 0.1);
+      // if (position(2) <= 0)
+      // {
+      //   position << 3.0, 5.0, 0.0;
+      // }
+
+      break;
+
   }
   return position;
 }
