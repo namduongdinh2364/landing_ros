@@ -399,7 +399,7 @@ AprilTagDetectionArray TagDetector::detectTags (
                                                  detection_names[i]));
     }
   }
-
+  /*you can add a topic to public pose of marker at here.*/
   return tag_detection_array;
 }
 

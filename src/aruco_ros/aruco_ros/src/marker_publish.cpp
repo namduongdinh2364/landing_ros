@@ -147,8 +147,8 @@ public:
     bool publishImage = image_pub_.getNumSubscribers() > 0;
     bool publishDebug = debug_pub_.getNumSubscribers() > 0;
 
-    if (!publishMarkers && !publishMarkersList && !publishImage && !publishDebug)
-      return;
+    // if (!publishMarkers && !publishMarkersList && !publishImage && !publishDebug)
+    //   return;
 
     ros::Time curr_stamp = msg->header.stamp;
     cv_bridge::CvImagePtr cv_ptr;
@@ -261,6 +261,7 @@ public:
 
 int main(int argc, char **argv)
 {
+  ROS_INFO("t12334-----------------");
   ros::init(argc, argv, "aruco_marker_publisher");
 
   ArucoMarkerPublisher node;

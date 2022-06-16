@@ -37,7 +37,7 @@ private:
 public:
 
 	DetectorSwitch(const ros::NodeHandle& nh, const ros::NodeHandle& nh_private);
-	void getPoseArucoCallback(const geometry_msgs::PoseWithCovarianceStamped& msg);
+	void getPoseArucoCallback(const geometry_msgs::PoseStamped& msg);
 	void getPoseApriltagCallback(const tf2_msgs::TFMessage& msg);
 	void getPoseCCtagCallback(const geometry_msgs::PoseWithCovarianceStamped& msg);
 	void pubPoseCallback(const ros::TimerEvent& event);

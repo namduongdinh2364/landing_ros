@@ -86,7 +86,6 @@ public:
   ArucoSimple() :
       cam_info_received(false), nh("~"), it(nh)
   {
-
     if (nh.hasParam("corner_refinement"))
       ROS_WARN(
           "Corner refinement options have been removed in ArUco 3.0.0, corner_refinement ROS parameter is deprecated");
@@ -184,15 +183,14 @@ public:
 
   void image_callback(const sensor_msgs::ImageConstPtr& msg)
   {
-    if ((image_pub.getNumSubscribers() == 0) && (debug_pub.getNumSubscribers() == 0)
-        && (pose_pub.getNumSubscribers() == 0) && (transform_pub.getNumSubscribers() == 0)
-        && (position_pub.getNumSubscribers() == 0) && (marker_pub.getNumSubscribers() == 0)
-        && (pixel_pub.getNumSubscribers() == 0))
-    {
-      ROS_DEBUG("No subscribers, not looking for ArUco markers");
-      return;
-    }
-
+    // if ((image_pub.getNumSubscribers() == 0) && (debug_pub.getNumSubscribers() == 0)
+    //     && (pose_pub.getNumSubscribers() == 0) && (transform_pub.getNumSubscribers() == 0)
+    //     && (position_pub.getNumSubscribers() == 0) && (marker_pub.getNumSubscribers() == 0)
+    //     && (pixel_pub.getNumSubscribers() == 0))
+    // {
+    //   ROS_DEBUG("No subscribers, not looking for ArUco markers");
+    //   return;
+    // }
     static tf::TransformBroadcaster br;
     if (cam_info_received)
     {
@@ -335,8 +333,8 @@ public:
 int main(int argc, char **argv)
 {
   ros::init(argc, argv, "aruco_simple");
-
   ArucoSimple node;
 
   ros::spin();
+  return 0;
 }

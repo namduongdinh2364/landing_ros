@@ -55,7 +55,7 @@ namespace aruco
  */
 MarkerDetector::MarkerDetector()
 {
-  markerIdDetector = aruco::MarkerLabeler::create(Dictionary::ALL_DICTS);
+  markerIdDetector = aruco::MarkerLabeler::create(Dictionary::ARUCO_MIP_36h12);
   setDetectionMode(DM_NORMAL);
 }
 
