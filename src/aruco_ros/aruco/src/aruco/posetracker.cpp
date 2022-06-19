@@ -481,6 +481,7 @@ cv::Mat MarkerMapPoseTracker::relocalization(const std::vector<Marker>& v_m)
   }
 
   // try using more than one marker approach
+  // std::cout << "marker size: " << mapMarkers.size() << std::endl;
   if (mapMarkers.size() >= 2)
   {
     // collect all the markers 3D locations
@@ -503,7 +504,7 @@ cv::Mat MarkerMapPoseTracker::relocalization(const std::vector<Marker>& v_m)
     // sort and get the best
     std::sort(all_marker_locations.begin(), all_marker_locations.end(), [](const minfo &a,const minfo &b)
     { return a.err<b.err;});
-    std::cerr << "err = " << all_marker_locations.front().err << std::endl;
+    // std::cerr << "err = " << all_marker_locations.front().err << std::endl;
     auto &best = all_marker_locations.front();
     pose_f2g_out = best.rt_f2m * marker_m2g[best.id];
   }
