@@ -46,8 +46,15 @@
 #include <tf/transform_listener.h>
 #include <visualization_msgs/Marker.h>
 
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+
 #include <dynamic_reconfigure/server.h>
 #include <aruco_ros/ArucoThresholdConfig.h>
+
+using namespace cv;
+using namespace aruco;
+using namespace std;
 
 class ArucoSimple
 {
@@ -70,7 +77,7 @@ private:
   std::string marker_frame;
   std::string camera_frame;
   std::string reference_frame;
-
+  MarkerMap TheMarkerMapConfig;  // configuration of the map
   double marker_size;
   int marker_id;
 
@@ -89,6 +96,9 @@ public:
     if (nh.hasParam("corner_refinement"))
       ROS_WARN(
           "Corner refinement options have been removed in ArUco 3.0.0, corner_refinement ROS parameter is deprecated");
+
+          // read marker map
+    TheMarkerMapConfig.readFromFile("/home/nam97/master/landing_ros/src/aruco_ros/aruco_ros/cfg/config.yml");
 
     aruco::MarkerDetector::Params params = mDetector.getParameters();
     std::string thresh_method;
@@ -205,78 +215,96 @@ public:
         markers.clear();
         // ok, let's detect
         mDetector.detect(inImage, markers, camParam, marker_size, false);
-        // for each marker, draw info and its boundaries in the image
-        for (std::size_t i = 0; i < markers.size(); ++i)
+        vector<Marker> Markers = mDetector.detect(inImage);
+        // print the markers detected that belongs to the markerset
+        vector<int> markers_from_set = TheMarkerMapConfig.getIndices(Markers);
+        for (auto idx : markers_from_set)
+            Markers[idx].draw(inImage, Scalar(0, 0, 255), 2);
+
+        // detect the 3d camera location wrt the markerset (if possible)
+        if (TheMarkerMapConfig.isExpressedInMeters() && camParam.isValid())
         {
-          // only publishing the selected marker
-          if (markers[i].id == marker_id)
-          {
-            tf::Transform transform = aruco_ros::arucoMarker2Tf(markers[i]);
-            tf::StampedTransform cameraToReference;
-            cameraToReference.setIdentity();
-
-            if (reference_frame != camera_frame)
-            {
-              getTransform(reference_frame, camera_frame, cameraToReference);
+            MarkerMapPoseTracker MSPoseTracker;  // tracks the pose of the marker map
+            MSPoseTracker.setParams(camParam, TheMarkerMapConfig);
+            if (MSPoseTracker.estimatePose(Markers)) { // if pose correctly computed, print the reference system
+                aruco::CvDrawingUtils::draw3dAxis(inImage, camParam, MSPoseTracker.getRvec(), MSPoseTracker.getTvec(),
+                                                  TheMarkerMapConfig[0].getMarkerSize() * 2);
+                cout<<"rvec="<<MSPoseTracker.getRvec()<<" tvec="<<MSPoseTracker.getTvec()<<endl;
             }
-
-            transform = static_cast<tf::Transform>(cameraToReference) * static_cast<tf::Transform>(rightToLeft)
-                * transform;
-
-            tf::StampedTransform stampedTransform(transform, curr_stamp, reference_frame, marker_frame);
-            br.sendTransform(stampedTransform);
-            geometry_msgs::PoseStamped poseMsg;
-            tf::poseTFToMsg(transform, poseMsg.pose);
-            poseMsg.header.frame_id = reference_frame;
-            poseMsg.header.stamp = curr_stamp;
-            pose_pub.publish(poseMsg);
-
-            geometry_msgs::TransformStamped transformMsg;
-            tf::transformStampedTFToMsg(stampedTransform, transformMsg);
-            transform_pub.publish(transformMsg);
-
-            geometry_msgs::Vector3Stamped positionMsg;
-            positionMsg.header = transformMsg.header;
-            positionMsg.vector = transformMsg.transform.translation;
-            position_pub.publish(positionMsg);
-
-            geometry_msgs::PointStamped pixelMsg;
-            pixelMsg.header = transformMsg.header;
-            pixelMsg.point.x = markers[i].getCenter().x;
-            pixelMsg.point.y = markers[i].getCenter().y;
-            pixelMsg.point.z = 0;
-            pixel_pub.publish(pixelMsg);
-
-            // publish rviz marker representing the ArUco marker patch
-            visualization_msgs::Marker visMarker;
-            visMarker.header = transformMsg.header;
-            visMarker.id = 1;
-            visMarker.type = visualization_msgs::Marker::CUBE;
-            visMarker.action = visualization_msgs::Marker::ADD;
-            visMarker.pose = poseMsg.pose;
-            visMarker.scale.x = marker_size;
-            visMarker.scale.y = marker_size;
-            visMarker.scale.z = 0.001;
-            visMarker.color.r = 1.0;
-            visMarker.color.g = 0;
-            visMarker.color.b = 0;
-            visMarker.color.a = 1.0;
-            visMarker.lifetime = ros::Duration(3.0);
-            marker_pub.publish(visMarker);
-
-          }
-          // but drawing all the detected markers
-          markers[i].draw(inImage, cv::Scalar(0, 0, 255), 2);
         }
+
+        // // for each marker, draw info and its boundaries in the image
+        // for (std::size_t i = 0; i < markers.size(); ++i)
+        // {
+        //   // only publishing the selected marker
+        //   if (markers[i].id == marker_id)
+        //   {
+        //     tf::Transform transform = aruco_ros::arucoMarker2Tf(markers[i]);
+        //     tf::StampedTransform cameraToReference;
+        //     cameraToReference.setIdentity();
+
+        //     if (reference_frame != camera_frame)
+        //     {
+        //       getTransform(reference_frame, camera_frame, cameraToReference);
+        //     }
+
+        //     transform = static_cast<tf::Transform>(cameraToReference) * static_cast<tf::Transform>(rightToLeft)
+        //         * transform;
+
+        //     tf::StampedTransform stampedTransform(transform, curr_stamp, reference_frame, marker_frame);
+        //     br.sendTransform(stampedTransform);
+        //     geometry_msgs::PoseStamped poseMsg;
+        //     tf::poseTFToMsg(transform, poseMsg.pose);
+        //     poseMsg.header.frame_id = reference_frame;
+        //     poseMsg.header.stamp = curr_stamp;
+        //     pose_pub.publish(poseMsg);
+
+        //     geometry_msgs::TransformStamped transformMsg;
+        //     tf::transformStampedTFToMsg(stampedTransform, transformMsg);
+        //     transform_pub.publish(transformMsg);
+
+        //     geometry_msgs::Vector3Stamped positionMsg;
+        //     positionMsg.header = transformMsg.header;
+        //     positionMsg.vector = transformMsg.transform.translation;
+        //     position_pub.publish(positionMsg);
+
+        //     geometry_msgs::PointStamped pixelMsg;
+        //     pixelMsg.header = transformMsg.header;
+        //     pixelMsg.point.x = markers[i].getCenter().x;
+        //     pixelMsg.point.y = markers[i].getCenter().y;
+        //     pixelMsg.point.z = 0;
+        //     pixel_pub.publish(pixelMsg);
+
+        //     // publish rviz marker representing the ArUco marker patch
+        //     visualization_msgs::Marker visMarker;
+        //     visMarker.header = transformMsg.header;
+        //     visMarker.id = 1;
+        //     visMarker.type = visualization_msgs::Marker::CUBE;
+        //     visMarker.action = visualization_msgs::Marker::ADD;
+        //     visMarker.pose = poseMsg.pose;
+        //     visMarker.scale.x = marker_size;
+        //     visMarker.scale.y = marker_size;
+        //     visMarker.scale.z = 0.001;
+        //     visMarker.color.r = 1.0;
+        //     visMarker.color.g = 0;
+        //     visMarker.color.b = 0;
+        //     visMarker.color.a = 1.0;
+        //     visMarker.lifetime = ros::Duration(3.0);
+        //     marker_pub.publish(visMarker);
+
+        //   }
+        //   // but drawing all the detected markers
+        //   // markers[i].draw(inImage, cv::Scalar(0, 0, 255), 2);
+        // }
 
         // draw a 3d cube in each marker if there is 3d info
-        if (camParam.isValid() && marker_size != -1)
-        {
-          for (std::size_t i = 0; i < markers.size(); ++i)
-          {
-            aruco::CvDrawingUtils::draw3dAxis(inImage, markers[i], camParam);
-          }
-        }
+        // if (camParam.isValid() && marker_size != -1)
+        // {
+        //   for (std::size_t i = 0; i < markers.size(); ++i)
+        //   {
+        //     aruco::CvDrawingUtils::draw3dAxis(inImage, markers[i], camParam);
+        //   }
+        // }
 
         if (image_pub.getNumSubscribers() > 0)
         {
