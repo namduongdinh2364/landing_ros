@@ -15,7 +15,7 @@ DetectorSwitch::DetectorSwitch(const ros::NodeHandle& nh, const ros::NodeHandle&
 		("/aruco_single/pose", 1, &DetectorSwitch::getPoseArucoCallback, this, ros::TransportHints().tcpNoDelay());
 	sub_tf_apriltag_ = nh_.subscribe
 		("/tf", 1, &DetectorSwitch::getPoseApriltagCallback, this, ros::TransportHints().tcpNoDelay());
-	sub_tf_cctag_ = nh_.subscribe
+	sub_tf_whycontag_ = nh_.subscribe
 		("/tf_cctag", 1, &DetectorSwitch::getPoseCCtagCallback, this, ros::TransportHints().tcpNoDelay());
 	pose_loop_ = nh_.createTimer(ros::Duration(0.1), &DetectorSwitch::pubPoseCallback, this);
 	status_loop_ = nh_.createTimer(ros::Duration(0.5), &DetectorSwitch::setstatusCallback, this);
@@ -74,14 +74,14 @@ void DetectorSwitch::pubPoseCallback(const ros::TimerEvent& event)
 				}
 			}
 			else {
-				if (detected_apriltag) {
-					pub_tf_.publish(apriltag_Pose_);
-					std::cout << "apriltag is used2" << std::endl;
-				}
-				else if (detected_aruco) {
-					pub_tf_.publish(aruco_Pose_);
-					std::cout << "aruco is used2" << std::endl;
-				}
+					if (detected_apriltag) {
+						pub_tf_.publish(apriltag_Pose_);
+						std::cout << "apriltag is used2" << std::endl;
+					}
+					else if (detected_aruco) {
+						pub_tf_.publish(aruco_Pose_);
+						std::cout << "aruco is used2" << std::endl;
+					}
 			}
 			break;
 	}
@@ -100,6 +100,7 @@ void DetectorSwitch::getPoseArucoCallback(const geometry_msgs::PoseStamped& msg)
 }
 void DetectorSwitch::getPoseApriltagCallback(const tf2_msgs::TFMessage& msg)
 {
+	/*  */
 	if (msg.transforms[0].child_frame_id == "my_bundle_2m") {
 		last_time_apriltag_ = TIME_NOW;
 		apriltag_Pose_.pose.position.x = msg.transforms[0].transform.translation.x;

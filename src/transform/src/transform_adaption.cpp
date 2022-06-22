@@ -87,8 +87,8 @@ void transformAdaption::checkloopCallback(const ros::TimerEvent& event) {
 	// 	pub_desPose_.publish(desPose_);
 	// 	ROS_WARN_STREAM("Enable Landing: UAV is approaded the maximum altitude");
 	// }
-	check_landing_constraints_loop();
-	check_detect_timeout_loop();
+	// check_landing_constraints_loop();
+	// check_detect_timeout_loop();
 }
 
 void transformAdaption::mavrosPose_Callback(const geometry_msgs::PoseStamped& msg)
