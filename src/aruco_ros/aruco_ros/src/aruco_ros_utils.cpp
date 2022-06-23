@@ -140,3 +140,32 @@ visualization_msgs::Marker aruco_ros::visMarkerFromPose(const geometry_msgs::Pos
   visMarker.lifetime = ros::Duration(3.0);
   return visMarker;
 }
+
+tf::Transform aruco_ros::arucoMarkerMap2Tf(const aruco::MarkerMapPoseTracker &marker)
+{
+  tf2::Transform tf2_tf = arucoMarkerMap2Tf2(marker);
+  return tf::Transform(
+        tf::Matrix3x3(tf::Quaternion(tf2_tf.getRotation().x(),
+                                     tf2_tf.getRotation().y(),
+                                     tf2_tf.getRotation().z(),
+                                     tf2_tf.getRotation().w())),
+                      tf::Vector3(tf2_tf.getOrigin().x(),
+                                  tf2_tf.getOrigin().y(),
+                                  tf2_tf.getOrigin().z()));
+}
+tf2::Transform aruco_ros::arucoMarkerMap2Tf2(const aruco::MarkerMapPoseTracker &marker)
+{
+  cv::Mat rot(3, 3, CV_64FC1);
+  cv::Mat Rvec64;
+  marker.getRvec().convertTo(Rvec64, CV_64FC1);
+  cv::Rodrigues(Rvec64, rot);
+  cv::Mat tran64;
+  marker.getTvec().convertTo(tran64, CV_64FC1);
+  tf2::Matrix3x3 tf_rot(rot.at<double>(0, 0), rot.at<double>(0, 1), rot.at<double>(0, 2), rot.at<double>(1, 0),
+                       rot.at<double>(1, 1), rot.at<double>(1, 2), rot.at<double>(2, 0), rot.at<double>(2, 1),
+                       rot.at<double>(2, 2));
+
+  tf2::Vector3 tf_orig(tran64.at<double>(0, 0), tran64.at<double>(0, 1), tran64.at<double>(0, 2));
+
+  return tf2::Transform(tf_rot, tf_orig);
+}

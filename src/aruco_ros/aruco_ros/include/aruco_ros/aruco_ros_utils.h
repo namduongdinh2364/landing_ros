@@ -25,6 +25,9 @@ aruco::CameraParameters rosCameraInfo2ArucoCamParams(const sensor_msgs::CameraIn
 tf::Transform arucoMarker2Tf(const aruco::Marker& marker);
 tf2::Transform arucoMarker2Tf2(const aruco::Marker& marker);
 
+tf::Transform arucoMarkerMap2Tf(const aruco::MarkerMapPoseTracker& marker);
+tf2::Transform arucoMarkerMap2Tf2(const aruco::MarkerMapPoseTracker& marker);
+
 std::vector<aruco::Marker> detectMarkers(const cv::Mat& img,
                                          const aruco::CameraParameters& cam_params,
                                          float marker_size,

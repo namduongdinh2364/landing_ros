@@ -40,6 +40,15 @@
 namespace aruco
 {
 
+struct mapconfig
+{
+  int nummarker;
+  std::string dictionary;
+  cv::FileNode markers;
+  int InfoType;
+};
+
+
 /**
  * 3D representation of a marker
  */
@@ -194,6 +203,8 @@ public:
    * Reads board info from a file
    */
   void readFromFile(std::string sfile);
+
+  void LoadConfig(struct mapconfig);
 
   // calculates the camera location w.r.t. the map using the information provided. Returns the <rvec, tvec>
   std::pair<cv::Mat, cv::Mat> calculateExtrinsics(const std::vector<aruco::Marker>& markers, float markerSize,
