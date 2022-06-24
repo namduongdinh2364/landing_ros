@@ -27,7 +27,6 @@ include_directories(
 )
 include_directories(
         include
-        ../include
 )
 file(GLOB SOURCES
                 src/transform_adaption_node.cpp
@@ -36,3 +35,6 @@ file(GLOB SOURCES
 )
 add_executable(${PROJECT_NAME}_node ${SOURCES})
 target_link_libraries(${PROJECT_NAME}_node ${catkin_LIBRARIES})
+
+add_executable(${PROJECT_NAME}_test_node test/test.cpp test/test_node.cpp)
+target_link_libraries(${PROJECT_NAME}_test_node ${catkin_LIBRARIES})

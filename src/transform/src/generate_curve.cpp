@@ -6,7 +6,7 @@
 namespace generate_curve {
 	void getIntersectionPoints(vector<Eigen::Vector3d> *points, const Eigen::Vector3f& marker_pos, const Eigen::Vector3f& uav_pos) {
 		Eigen::Vector3f pointa(marker_pos(0), marker_pos(1), uav_pos(2));
-		Eigen::Vector3d point10, point20, point25, point0, point4;
+		Eigen::Vector3d point10, point20, point25, point0, point4, point5;
 		double distance, distance10 , distance20, distance25;
 		distance = (uav_pos - pointa).norm();
 		distance25 = tan(DEGREE2RADIAN(25)) * 9.0;
@@ -59,10 +59,12 @@ namespace generate_curve {
 		// }
 		if (uav_pos(2) > 8.5)
 		{
-			point4 << marker_pos(0), marker_pos(1), 8.0;
+			point4 << marker_pos(0), marker_pos(1), 8.2;
 			points->push_back(point4);
 		}
 		else {
+			// point5 << marker_pos(0), marker_pos(1), ALTITUDE_CHANGE_METHOD + 1.0;
+			// points->push_back(point5);
 			point0 << marker_pos(0), marker_pos(1), ALTITUDE_CHANGE_METHOD - 1.0;
 			points->push_back(point0);
 		}

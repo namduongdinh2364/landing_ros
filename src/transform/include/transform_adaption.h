@@ -79,6 +79,7 @@ public:
 	void check_landing_constraints_loop();
 	void check_detect_timeout_loop();
 	void get_marker_pose_with_distance();
+	void get_marker_pose();
 };
 
 #endif

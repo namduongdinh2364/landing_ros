@@ -62,25 +62,25 @@ void DetectorSwitch::pubPoseCallback(const ros::TimerEvent& event)
 					|| (!detected_apriltag && !detected_aruco))
 				{
 					pub_tf_.publish(cctag_Pose_);
-					std::cout << "cctag is used" << std::endl;
+					// std::cout << "cctag is used" << std::endl;
 				}
 				else if (detected_apriltag) {
 					pub_tf_.publish(apriltag_Pose_);
-					std::cout << "apriltag is used1" << std::endl;
+					// std::cout << "apriltag is used1" << std::endl;
 				}
 				else if (detected_aruco) {
 					pub_tf_.publish(aruco_Pose_);
-					std::cout << "aruco is used1" << std::endl;
+					// std::cout << "aruco is used1" << std::endl;
 				}
 			}
 			else {
 				if (detected_apriltag) {
 					pub_tf_.publish(apriltag_Pose_);
-					std::cout << "apriltag is used2" << std::endl;
+					// std::cout << "apriltag is used2" << std::endl;
 				}
 				else if (detected_aruco) {
 					pub_tf_.publish(aruco_Pose_);
-					std::cout << "aruco is used2" << std::endl;
+					// std::cout << "aruco is used2" << std::endl;
 				}
 			}
 			break;
