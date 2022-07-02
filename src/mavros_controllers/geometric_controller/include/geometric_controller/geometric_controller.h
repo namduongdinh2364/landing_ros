@@ -70,10 +70,17 @@
 #include <trajectory_msgs/MultiDOFJointTrajectory.h>
 #include <trajectory_msgs/MultiDOFJointTrajectoryPoint.h>
 
+#include <sensor_msgs/NavSatFix.h>
+#include <sensor_msgs/Imu.h>
+
 #include "geometric_controller/common.h"
+#include "UTM.h"
+#include "logging_lib.cpp"
+#include <cmath>
 
 #define ERROR_QUATERNION 1
 #define ERROR_GEOMETRIC 2
+#define RPG_CONTROLLER 3
 
 using namespace std;
 using namespace Eigen;
@@ -95,11 +102,15 @@ class geometricCtrl {
   ros::NodeHandle nh_;
   ros::NodeHandle nh_private_;
   ros::Subscriber referenceSub_;
+  ros::Subscriber marker_;
   ros::Subscriber flatreferenceSub_;
   ros::Subscriber multiDOFJointSub_;
   ros::Subscriber mavstateSub_;
+  ros::Subscriber gpsrawSub_;
+  ros::Subscriber global_poseSub_;
   ros::Subscriber mavposeSub_, gzmavposeSub_;
   ros::Subscriber mavtwistSub_;
+  ros::Subscriber imuSub_,imuloadSub_;
   ros::Subscriber yawreferenceSub_;
   ros::Publisher rotorVelPub_, angularVelPub_, target_pose_pub_;
   ros::Publisher referencePosePub_;
@@ -110,22 +121,28 @@ class geometricCtrl {
   ros::ServiceServer ctrltriggerServ_;
   ros::ServiceServer land_service_;
   ros::Timer cmdloop_timer_, statusloop_timer_;
-  ros::Time last_request_, reference_request_now_, reference_request_last_;
-
+  ros::Time last_request_, reference_request_now_, reference_request_last_ , last_landing_request , last_landing_command;
   string mav_name_;
   bool fail_detec_, ctrl_enable_, feedthrough_enable_;
   int ctrl_mode_;
-  bool landing_commanded_;
+  bool landing_commanded_,landing_detected;
   bool sim_enable_;
+  int landing = 0;
+  int gps_enable = 1 ;
   bool velocity_yaw_;
   double kp_rot_, kd_rot_;
   double reference_request_dt_;
+  double UTM_X,UTM_Y,UTM_HOME_X,UTM_HOME_Y;
   double attctrl_tau_;
   double norm_thrust_const_, norm_thrust_offset_;
   double max_fb_acc_;
   double dx_, dy_, dz_;
-  bool landing_detec_;
-
+  double last_yaw_ref = 0;
+  double drone_max_accel =25.0;
+  double k_thrust_horz = 0 ;
+  double drone_max_ver_acc =18.0;
+  double landing_loop = 1.0;
+  Eigen::Vector3d last_detected_pos;
   mavros_msgs::State current_state_;
   mavros_msgs::SetMode offb_set_mode_, land_set_mode_;
   mavros_msgs::CommandBool arm_cmd_;
@@ -136,22 +153,42 @@ class geometricCtrl {
   Eigen::Vector3d targetPos_, targetVel_, targetAcc_, targetJerk_, targetSnap_, targetPos_prev_, targetVel_prev_;
   Eigen::Vector3d mavPos_, mavVel_, mavRate_;
   Eigen::Vector3d last_ref_acc_{Eigen::Vector3d::Zero()};
+  Eigen::Vector3d landing_vel,landing_pos;
   double mavYaw_;
   Eigen::Vector3d g_;
-  Eigen::Vector4d mavAtt_, q_des;
+  Eigen::Quaterniond mavAtt_, q_des;
   Eigen::Vector4d cmdBodyRate_;  //{wx, wy, wz, Thrust}
   Eigen::Vector3d Kpos_, Kvel_, D_;
   Eigen::Vector3d a0, a1, tau;
-  double tau_x, tau_y, tau_z;
-  double Kpos_x_, Kpos_y_, Kpos_z_, Kvel_x_, Kvel_y_, Kvel_z_;
-  int posehistory_window_;
+  Eigen::Vector3d globalPos_,gpsraw,gps_pos;
+  Eigen::Vector3d globalVel_;
+  Eigen::Vector3d Imu_base,Imu_load_base;
+  Eigen::Quaterniond Imu_load_quat;
+  Eigen::Vector3d Load_accel;
+  Eigen::Vector3d Imu_accel;
+  Eigen::Vector3d Imu_ang_vel;
+  Eigen::Vector3d drag_accel;
+  Eigen::Vector4d globalAtt_;
+  Eigen::Vector3d marker_horizontal;
+  Eigen::Vector3d Landing_velocity,Landing_last_horizontal_error;
+  double Landing_velocity_;
+  bool landing_detec_;
 
+  double tau_x, tau_y, tau_z;
+  double krp = 2.0, kyaw = 2.0, kvel_landing = 7,kpos_landing = 3;
+  double Kpos_x_, Kpos_y_, Kpos_z_, Kvel_x_, Kvel_y_, Kvel_z_ , Krp_ , Kyaw_;
+  int posehistory_window_;
+  
+  void imuCallback(const sensor_msgs::Imu &msg);
+  void imuloadCallback(const sensor_msgs::Imu &msg);
   void pubMotorCommands();
-  void pubRateCommands(const Eigen::Vector4d &cmd, const Eigen::Vector4d &target_attitude);
+  void globalCallback(const nav_msgs::Odometry &msg);
+  void gpsrawCallback(const sensor_msgs::NavSatFix &msg);
+  void pubRateCommands(const Eigen::Vector4d &cmd, const Eigen::Quaterniond &target_attitude);
   void pubReferencePose(const Eigen::Vector3d &target_position, const Eigen::Vector4d &target_attitude);
   void pubPoseHistory();
   void pubSystemStatus();
-  void appendPoseHistory();
+  void markerCallback(const geometry_msgs::PoseStamped &msg);
   void odomCallback(const nav_msgs::OdometryConstPtr &odomMsg);
   void targetCallback(const geometry_msgs::TwistStamped &msg);
   void flattargetCallback(const controller_msgs::FlatTarget &msg);
@@ -172,8 +209,8 @@ class geometricCtrl {
   Eigen::Vector3d poscontroller(const Eigen::Vector3d &pos_error, const Eigen::Vector3d &vel_error);
   Eigen::Vector4d attcontroller(const Eigen::Vector4d &ref_att, const Eigen::Vector3d &ref_acc,
                                 Eigen::Vector4d &curr_att);
-  Eigen::Vector4d geometric_attcontroller(const Eigen::Vector4d &ref_att, const Eigen::Vector3d &ref_acc,
-                                          Eigen::Vector4d &curr_att);
+  Eigen::Vector4d geometric_attcontroller(const Eigen::Quaterniond &ref_att, const Eigen::Vector3d &ref_acc,
+                                          Eigen::Quaterniond &curr_att);
   Eigen::Vector4d jerkcontroller(const Eigen::Vector3d &ref_jerk, const Eigen::Vector3d &ref_acc,
                                  Eigen::Vector4d &ref_att, Eigen::Vector4d &curr_att);
 
@@ -190,21 +227,20 @@ class geometricCtrl {
   };
   geometry_msgs::Pose home_pose_;
   bool received_home_pose;
-
+  bool gps_home_init = false;
+  Eigen::Vector3d gps_home = Eigen::Vector3d::Zero();
  public:
   void dynamicReconfigureCallback(geometric_controller::GeometricControllerConfig &config, uint32_t level);
   geometricCtrl(const ros::NodeHandle &nh, const ros::NodeHandle &nh_private);
   virtual ~geometricCtrl();
-  void getStates(Eigen::Vector3d &pos, Eigen::Vector4d &att, Eigen::Vector3d &vel, Eigen::Vector3d &angvel) {
-    pos = mavPos_;
-    att = mavAtt_;
-    vel = mavVel_;
-    angvel = mavRate_;
-  };
   void getErrors(Eigen::Vector3d &pos, Eigen::Vector3d &vel) {
     pos = mavPos_ - targetPos_;
     vel = mavVel_ - targetVel_;
   };
+  Eigen::Vector3d horizontal_part(Eigen::Vector3d a){
+    Eigen::Vector3d new_a ; new_a << a(0), a(1) ,0.0;
+    return new_a;
+  }
   void setBodyRateCommand(Eigen::Vector4d bodyrate_command) { cmdBodyRate_ = bodyrate_command; };
   void setFeedthrough(bool feed_through) { feedthrough_enable_ = feed_through; };
   void setDesiredAcceleration(Eigen::Vector3d &acceleration) { targetAcc_ = acceleration; };

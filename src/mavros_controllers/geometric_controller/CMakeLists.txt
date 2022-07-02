@@ -35,7 +35,7 @@ include_directories(
 )
 
 add_library(${PROJECT_NAME}
-  src/geometric_controller.cpp 
+  src/geometric_controller.cpp
 )
 add_dependencies(geometric_controller ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
@@ -43,11 +43,17 @@ target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 ############
 # BINARIES #
 ############
+add_executable(land
+  src/land.cpp
+)
 add_executable(geometric_controller_node
   src/geometric_controller_node.cpp
 )
+
 add_dependencies(geometric_controller_node geometric_controller ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
 target_link_libraries(geometric_controller_node ${PROJECT_NAME} ${catkin_LIBRARIES})
+target_link_libraries(land ${PROJECT_NAME} ${catkin_LIBRARIES})
 ##########
 # EXPORT #
 ##########

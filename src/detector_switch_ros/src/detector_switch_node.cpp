@@ -1,4 +1,4 @@
-#include "detector_switch_ros/detector_switch.h"
+#include "detector_switch.h"
 
 int main(int argc, char **argv) {
 	ros::init(argc, argv, "detector_switch");

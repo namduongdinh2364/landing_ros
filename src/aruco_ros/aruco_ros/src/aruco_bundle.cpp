@@ -61,17 +61,14 @@ private:
 	ros::Subscriber cam_info_sub;
 	bool cam_info_received;
 	image_transport::Publisher image_pub;
-	image_transport::Publisher debug_pub;
 	ros::Publisher pose_pub;
 	ros::Publisher transform_pub;
 	ros::Publisher position_pub;
-	ros::Publisher marker_pub; // rviz visualization marker
 
 	std::string marker_frame;
 	std::string camera_frame;
 	std::string reference_frame;
-	MarkerMap TheMarkerMapConfig;  // configuration of the map
-	double marker_size;
+	MarkerMap TheMarkerMapConfig;
 
 	ros::NodeHandle nh;
 	image_transport::ImageTransport it;
@@ -85,10 +82,9 @@ public:
 	ArucoSimple() :
 	cam_info_received(false), nh("~"), it(nh)
 	{
-		// read marker map
-		struct mapconfig config;
-		TheMarkerMapConfig.LoadConfig(config);
+        /* Currently aruco map file use absolute path. */
 		TheMarkerMapConfig.readFromFile("/home/nam97/master/landing_ros/src/aruco_ros/aruco_ros/cfg/config.yml");
+
 		aruco::MarkerDetector::Params params = mDetector.getParameters();
 		std::string thresh_method;
 		switch (params._thresMethod)
@@ -127,13 +123,10 @@ public:
 		cam_info_sub = nh.subscribe("/camera_info", 1, &ArucoSimple::cam_info_callback, this);
 
 		image_pub = it.advertise("result", 1);
-		debug_pub = it.advertise("debug", 1);
 		pose_pub = nh.advertise<geometry_msgs::PoseStamped>("pose", 100);
 		transform_pub = nh.advertise<geometry_msgs::TransformStamped>("transform", 100);
 		position_pub = nh.advertise<geometry_msgs::Vector3Stamped>("position", 100);
-		marker_pub = nh.advertise<visualization_msgs::Marker>("marker", 10);
 
-		nh.param<double>("marker_size", marker_size, 0.75);
 		nh.param<std::string>("reference_frame", reference_frame, "");
 		nh.param<std::string>("camera_frame", camera_frame, "");
 		nh.param<std::string>("marker_frame", marker_frame, "");
@@ -151,8 +144,8 @@ public:
 	{
 		std::string errMsg;
 
-		if (!_tfListener.waitForTransform(refFrame, childFrame, ros::Time(0), ros::Duration(0.5), ros::Duration(0.01),
-																			&errMsg))
+		if (!_tfListener.waitForTransform(refFrame, childFrame, ros::Time(0), 
+                                            ros::Duration(0.5), ros::Duration(0.01), &errMsg))
 		{
 			ROS_ERROR_STREAM("Unable to get pose from TF: " << errMsg);
 			return false;
@@ -161,8 +154,7 @@ public:
 		{
 			try
 			{
-				_tfListener.lookupTransform(refFrame, childFrame, ros::Time(0), // get latest available
-																		transform);
+				_tfListener.lookupTransform(refFrame, childFrame, ros::Time(0), transform);
 			}
 			catch (const tf::TransformException& e)
 			{
@@ -176,7 +168,6 @@ public:
 
 	void image_callback(const sensor_msgs::ImageConstPtr& msg)
 	{
-		static tf::TransformBroadcaster br;
 		if (cam_info_received)
 		{
 			ros::Time curr_stamp = msg->header.stamp;
@@ -188,23 +179,13 @@ public:
 
 				// detection results will go into "markers"
 				markers.clear();
-				// ok, let's detect
-				// mDetector.detect(inImage, markers, camParam, marker_size, false);
 				vector<Marker> Markers = mDetector.detect(inImage);
-				// print the markers detected that belongs to the markerset
-				vector<int> markers_from_set = TheMarkerMapConfig.getIndices(Markers);
-				for (auto idx : markers_from_set)
-					Markers[idx].draw(inImage, Scalar(0, 0, 255), 2);
-
 				// detect the 3d camera location wrt the markerset (if possible)
 				if (TheMarkerMapConfig.isExpressedInMeters() && camParam.isValid())
 				{
 					MarkerMapPoseTracker MSPoseTracker;  // tracks the pose of the marker map
 					MSPoseTracker.setParams(camParam, TheMarkerMapConfig);
-					if (MSPoseTracker.estimatePose(Markers)) { // if pose correctly computed, print the reference system
-						aruco::CvDrawingUtils::draw3dAxis(inImage, camParam, MSPoseTracker.getRvec(), MSPoseTracker.getTvec(),
-																							TheMarkerMapConfig[0].getMarkerSize() * 2);
-						// cout<<"rvec="<<MSPoseTracker.getRvec()<<" tvec="<<MSPoseTracker.getTvec()<<endl;
+					if (MSPoseTracker.estimatePose(Markers)) {
 						tf::Transform transform = aruco_ros::arucoMarkerMap2Tf(MSPoseTracker);
 						tf::StampedTransform cameraToReference;
 						cameraToReference.setIdentity();
@@ -214,60 +195,12 @@ public:
 						transform = static_cast<tf::Transform>(cameraToReference) * 
 									static_cast<tf::Transform>(rightToLeft) * transform;
 						tf::StampedTransform stampedTransform(transform, curr_stamp, reference_frame, marker_frame);
-						br.sendTransform(stampedTransform);
 						geometry_msgs::PoseStamped poseMsg;
 						tf::poseTFToMsg(transform, poseMsg.pose);
 						poseMsg.header.frame_id = reference_frame;
 						poseMsg.header.stamp = curr_stamp;
 						pose_pub.publish(poseMsg);
-
-						geometry_msgs::TransformStamped transformMsg;
-						tf::transformStampedTFToMsg(stampedTransform, transformMsg);
-						transform_pub.publish(transformMsg);
-
-						geometry_msgs::Vector3Stamped positionMsg;
-						positionMsg.header = transformMsg.header;
-						positionMsg.vector = transformMsg.transform.translation;
-						position_pub.publish(positionMsg);
-
-						// publish rviz marker representing the ArUco marker patch
-						visualization_msgs::Marker visMarker;
-						visMarker.ns = "basic_shapes";
-						visMarker.header = transformMsg.header;
-						visMarker.id = 1;
-						visMarker.type = visualization_msgs::Marker::CUBE;
-						visMarker.action = visualization_msgs::Marker::ADD;
-						visMarker.pose = poseMsg.pose;
-						visMarker.scale.x = marker_size;
-						visMarker.scale.y = marker_size;
-						visMarker.scale.z = 1.0;
-						visMarker.color.r = 1.0;
-						visMarker.color.g = 0;
-						visMarker.color.b = 0;
-						visMarker.color.a = 1.0;
-						visMarker.lifetime = ros::Duration(3.0);
-						marker_pub.publish(visMarker);
 					}
-				}
-
-				if (image_pub.getNumSubscribers() > 0)
-				{
-					// show input with augmented information
-					cv_bridge::CvImage out_msg;
-					out_msg.header.stamp = curr_stamp;
-					out_msg.encoding = sensor_msgs::image_encodings::RGB8;
-					out_msg.image = inImage;
-					image_pub.publish(out_msg.toImageMsg());
-				}
-
-				if (debug_pub.getNumSubscribers() > 0)
-				{
-					// show also the internal image resulting from the threshold operation
-					cv_bridge::CvImage debug_msg;
-					debug_msg.header.stamp = curr_stamp;
-					debug_msg.encoding = sensor_msgs::image_encodings::MONO8;
-					debug_msg.image = mDetector.getThresholdedImage();
-					debug_pub.publish(debug_msg.toImageMsg());
 				}
 			}
 			catch (cv_bridge::Exception& e)

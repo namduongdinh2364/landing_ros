@@ -34,5 +34,14 @@ file(GLOB SOURCES
                 src/detector_switch_node.cpp
                 src/detector_switch.cpp
 )
+
+file(GLOB SOURCES_1
+                src/transform_adaption_node.cpp
+                src/transform_adaption.cpp
+)
+
 add_executable(${PROJECT_NAME}_node ${SOURCES})
 target_link_libraries(${PROJECT_NAME}_node ${catkin_LIBRARIES})
+
+add_executable(transform_adaption_node ${SOURCES_1})
+target_link_libraries(transform_adaption_node ${catkin_LIBRARIES})

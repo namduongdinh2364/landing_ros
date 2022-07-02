@@ -1,0 +1,12 @@
+<launch>
+  <arg name="name" default="whycon"/>
+  <arg name="targets" default="1"/>
+
+  <node name="whycon" type="whycon" pkg="whycon" output="screen">
+    <param name="targets" value="$(arg targets)"/>
+    <param name="name" value="$(arg name)"/>
+    <param name="outer_diameter" value="0.159"/>
+    <param name="inner_diameter" value="0.064"/>
+  </node>
+</launch>
+  

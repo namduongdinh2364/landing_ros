@@ -118,36 +118,6 @@ void MarkerMap::readFromFile(std::string sfile)
   }
 }
 
-void MarkerMap::LoadConfig(struct mapconfig)
-{
-  // int aux = 0;
-  // // look for the nmarkers
-  // if (fs["aruco_bc_nmarkers"].name() != "aruco_bc_nmarkers")
-  //   throw cv::Exception(81818, "MarkerMap::readFromFile", "invalid file type", __FILE__, __LINE__);
-  // fs["aruco_bc_nmarkers"] >> aux;
-  // resize(aux);
-  // fs["aruco_bc_mInfoType"] >> mInfoType;
-  // cv::FileNode markers = fs["aruco_bc_markers"];
-  // int i = 0;
-  // for (cv::FileNodeIterator it = markers.begin(); it != markers.end(); ++it, i++)
-  // {
-  //   at(i).id = (*it)["id"];
-  //   cv::FileNode FnCorners = (*it)["corners"];
-  //   for (cv::FileNodeIterator itc = FnCorners.begin(); itc != FnCorners.end(); ++itc)
-  //   {
-  //     std::vector<float> coordinates3d;
-  //     (*itc) >> coordinates3d;
-  //     if (coordinates3d.size() != 3)
-  //       throw cv::Exception(81818, "MarkerMap::readFromFile", "invalid file type 3", __FILE__, __LINE__);
-  //     cv::Point3f point(coordinates3d[0], coordinates3d[1], coordinates3d[2]);
-  //     at(i).push_back(point);
-  //   }
-  // }
-
-  // if (fs["aruco_bc_dict"].name() == "aruco_bc_dict")
-  //   fs["aruco_bc_dict"] >> dictionary;
-}
-
 /**
  * Reads board info from a file
  */
