@@ -1,5 +1,7 @@
 #include "transform_adaption.h"
 
+#define PRECISION(x)    round(x * 100) / 100
+
 transformAdaption::transformAdaption(const ros::NodeHandle& nh, const ros::NodeHandle& nh_private)
 	: nh_(nh), nh_private_(nh_private), cur_yaw_(0), locked_trans_(false), accept_landing(false),
 	locked_landing_(false)
@@ -18,7 +20,7 @@ transformAdaption::transformAdaption(const ros::NodeHandle& nh, const ros::NodeH
 	sub_marker_pose_ = nh_.subscribe
 		("/tf_marker", 1, &transformAdaption::get_marker_pose_Callback, this, ros::TransportHints().tcpNoDelay());
 
-	markerPoseUpdate_loop_ = nh_.createTimer(ros::Duration(0.01), &transformAdaption::loopCallback, this);
+	markerPoseUpdate_loop_ = nh_.createTimer(ros::Duration(0.1), &transformAdaption::loopCallback, this);
 	check_loop_ = nh_.createTimer(ros::Duration(0.1), &transformAdaption::checkloopCallback, this);
 
 	land_client_ = nh_.serviceClient<std_srvs::SetBool>("/land");
@@ -58,8 +60,8 @@ void transformAdaption::loopCallback(const ros::TimerEvent& event) {
 	if (locked_trans_)
 	{
 		locked_trans_ = false;
-		desPose_.pose.position.x = markerPose_(0);
-		desPose_.pose.position.y = markerPose_(1);
+		desPose_.pose.position.x = PRECISION(markerPose_(0));
+		desPose_.pose.position.y = PRECISION(markerPose_(1));
 		desPose_.pose.position.z = 0.0;
 		if (cur_pose_(2) < 0.5) {
 			accept_landing = true;

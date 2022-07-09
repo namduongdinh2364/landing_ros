@@ -60,25 +60,25 @@ void DetectorSwitch::pubPoseCallback(const ros::TimerEvent& event)
 					|| (!detected_apriltag && !detected_aruco))
 				{
 					pub_tf_.publish(whycon_Pose_);
-					std::cout << "whycon is used" << std::endl;
+					// std::cout << "whycon is used" << std::endl;
 				}
 				else if(detected_apriltag && cur_pose_.pose.position.z < 4 || !detected_aruco && detected_apriltag) {
 					pub_tf_.publish(apriltag_Pose_);
-					std::cout << "apriltag is used" << std::endl;
+					// std::cout << "apriltag is used" << std::endl;
 				}
 				else if(detected_aruco) {
 					pub_tf_.publish(aruco_Pose_);
-					std::cout << "aruco is used" << std::endl;
+					// std::cout << "aruco is used" << std::endl;
 				}
 			}
 			else {
 				if (detected_apriltag && cur_pose_.pose.position.z < 4 || !detected_aruco && detected_apriltag) {
 					pub_tf_.publish(apriltag_Pose_);
-					std::cout << "whycon isn't detected and apriltag is used" << std::endl;
+					// std::cout << "whycon isn't detected and apriltag is used" << std::endl;
 				}
 				else if(detected_aruco) {
 					pub_tf_.publish(aruco_Pose_);
-					std::cout << "whycon isn't detected and aruco is used" << std::endl;
+					// std::cout << "whycon isn't detected and aruco is used" << std::endl;
 				}
 			}
 			break;
