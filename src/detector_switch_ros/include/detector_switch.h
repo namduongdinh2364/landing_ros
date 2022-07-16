@@ -27,13 +27,16 @@ private:
 	ros::Subscriber sub_tf_aruco_;
 	ros::Publisher pub_tf_;
 	ros::Timer pose_loop_;
+	ros::Timer stable_loop_;
 	ros::Subscriber sub_mavros_local_position_;
 	ros::Time last_time_whycon_, last_time_apriltag_, last_time_aruco_;
 
 	geometry_msgs::PoseStamped apriltag_Pose_, whycon_Pose_, aruco_Pose_, cur_pose_;
 	double marker_size_;
 	int type_;
+	int numStableWhy, numStableAru, numStableApr;
 	bool detected_apriltag, detected_whycon, detected_aruco;
+	bool stable_apriltag, stable_whycon, stable_aruco;
 public:
 
 	DetectorSwitch(const ros::NodeHandle& nh, const ros::NodeHandle& nh_private);
@@ -42,6 +45,7 @@ public:
 	void getPoseWhyconCallback(const geometry_msgs::PoseArray& msg);
 	void pubPoseCallback(const ros::TimerEvent& event);
 	void setstatusCallback(const ros::TimerEvent& event);
+	void stableCheckCallback(const ros::TimerEvent& event);
 	void mavrosPose_Callback(const geometry_msgs::PoseStamped& msg);
 };
 

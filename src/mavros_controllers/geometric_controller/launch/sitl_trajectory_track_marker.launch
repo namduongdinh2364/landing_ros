@@ -30,7 +30,7 @@
           <param name="Kv_y" value="2.0"/>
           <param name="Kv_z" value="1.5"/>
           <param name="yaw_heading" value="0.0"/>
-          <param name="init_pos_z" value="7.0"/>
+          <param name="init_pos_z" value="10.0"/>
   </node>
 
   <include file="$(find mavros)/launch/node.launch">

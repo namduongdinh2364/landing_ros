@@ -23,7 +23,7 @@ transformAdaption::transformAdaption(const ros::NodeHandle& nh, const ros::NodeH
 	markerPoseUpdate_loop_ = nh_.createTimer(ros::Duration(0.1), &transformAdaption::loopCallback, this);
 	check_loop_ = nh_.createTimer(ros::Duration(0.1), &transformAdaption::checkloopCallback, this);
 
-    land_service_ = nh_.advertiseService("land2", &transformAdaption::enableLandCallback, this);
+	land_service_ = nh_.advertiseService("land2", &transformAdaption::enableLandCallback, this);
 	/* Rotation matrix from camera to UAV. It's customizable with different setup */
 	cam2drone_matrix_ << 0.0 , -1.0 , 0.0 , -1.0 , 0.0 , 0.0 , 0.0 , 0.0 , -1.0;
 
@@ -82,7 +82,7 @@ void transformAdaption::checkloopCallback(const ros::TimerEvent& event) {
 	// 	pub_desPose_.publish(desPose_);
 	// 	ROS_WARN_STREAM("Enable Landing: UAV is approaded the maximum altitude");
 	// }
-	check_landing_constraints_loop();
+	// check_landing_constraints_loop();
 	check_detect_timeout_loop();
 }
 
@@ -160,7 +160,7 @@ void transformAdaption::check_detect_timeout_loop()
 	/**
 	 * If can't detect marker during 2 second.
 	 * Get detect again failed more than maxium,
-	 * Landing will be called.
+	 * UAV will be increased height.
 	 * TODO: Need to improve
 	 */
 	if(((TIME_NOW - last_time_trans_) > TIME_DURATION(2.0)) && start_landing_) {
@@ -168,7 +168,7 @@ void transformAdaption::check_detect_timeout_loop()
 		// if(TIME_NOW - timeout_repeat_trans_ > TIME_DURATION(2.0)) {
 		// 	detect_failed_repeat_ ++;
 		// 	timeout_repeat_trans_ = TIME_NOW;
-        ROS_INFO("Can't detect Marker");
+		ROS_WARN_STREAM("Can't detect Marker");
 		// }
 		if(!locked_inc_altitude_) {
 			new_altitude = cur_pose_(2) + INCREASE_ALTITUDE_NOT_DETECT;

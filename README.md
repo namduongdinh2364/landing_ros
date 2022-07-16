@@ -62,7 +62,7 @@ roslaunch geometric_controller sitl_trajectory_track_marker.launch
 ```
 Another terminal runs:
 ``` bash
-rosrun geometric_controller land
+rosrun geometric_controller landing
 ```
 
 

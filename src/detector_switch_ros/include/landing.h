@@ -27,5 +27,6 @@
 #define TIME_DURATION(x)        ros::Duration(x)
 // #define LOG_INFO                1
 
+#define STABLENUMBER        2
 
 #endif /* LANDING_H */

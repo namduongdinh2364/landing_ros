@@ -18,22 +18,83 @@ DetectorSwitch::DetectorSwitch(const ros::NodeHandle& nh, const ros::NodeHandle&
 	sub_tf_whycon_ = nh_.subscribe
 		("/whycon/pose", 1, &DetectorSwitch::getPoseWhyconCallback, this, ros::TransportHints().tcpNoDelay());
 	pose_loop_ = nh_.createTimer(ros::Duration(0.1), &DetectorSwitch::pubPoseCallback, this);
+	stable_loop_ = nh_.createTimer(ros::Duration(0.2), &DetectorSwitch::stableCheckCallback, this);
 	type_ = 4;
+	numStableWhy = 0;
+	numStableAru = 0;
+	numStableApr = 0;
+}
+
+void DetectorSwitch::stableCheckCallback(const ros::TimerEvent& event)
+{
+	/*
+	 * Every 0.2s check again to see if marker is detected.
+	 * If marker is continuously detected in 0.6s.
+	 * => marker is detected stably.
+	 */
+	if (stable_whycon) {
+		numStableWhy ++;
+		stable_whycon = false;
+	}
+	// else {
+	//     numStableWhy = 0;
+	//     detected_whycon = false;
+	// }
+
+	if (stable_aruco) {
+		numStableAru ++;
+		stable_aruco = false;
+	}
+	// else {
+	//     numStableAru = 0;
+	//     detected_aruco = false;
+	// }
+
+	if (stable_apriltag) {
+		numStableApr ++;
+		stable_apriltag = false;
+	}
+	// else {
+	//     numStableApr = 0;
+	//     detected_apriltag = false;
+	// }
+
+	if (numStableWhy > STABLENUMBER) {
+		numStableWhy = STABLENUMBER;
+		detected_whycon = true;
+	}
+	if (numStableAru > STABLENUMBER) {
+		numStableAru = STABLENUMBER;
+		detected_aruco = true;
+	}
+	if (numStableApr > STABLENUMBER) {
+		numStableApr = STABLENUMBER;
+		detected_apriltag = true;
+	}
+
 }
 
 void DetectorSwitch::pubPoseCallback(const ros::TimerEvent& event)
 {
-	if((TIME_NOW - last_time_whycon_) > TIME_DURATION(1.0)) {
+	/*
+	 * If then 0.3s the marker isn't detected.
+	 * => marker is unstable and not detect.
+	 */
+	if((TIME_NOW - last_time_whycon_) > TIME_DURATION(0.3)) {
 		detected_whycon = false;
+		ROS_WARN_STREAM("Whycon is unstable");
 	}
 
-	if((TIME_NOW - last_time_apriltag_) > TIME_DURATION(1.0)) {
-		detected_apriltag = false;
-	}
-
-	if((TIME_NOW - last_time_aruco_) > TIME_DURATION(1.0)) {
+	if((TIME_NOW - last_time_aruco_) > TIME_DURATION(0.3)) {
 		detected_aruco = false;
+		ROS_WARN_STREAM("Aruco is unstable");
 	}
+
+	if((TIME_NOW - last_time_apriltag_) > TIME_DURATION(0.3)) {
+		detected_apriltag = false;
+		ROS_WARN_STREAM("Apriltag is unstable");
+	}
+
 	switch (type_) {
 		case 1:
 			if(detected_apriltag)
@@ -94,7 +155,7 @@ void DetectorSwitch::getPoseArucoCallback(const geometry_msgs::PoseStamped& msg)
 {
 	last_time_aruco_ = TIME_NOW;
 	aruco_Pose_ = msg;
-	detected_aruco = true;
+	stable_aruco = true;
 }
 void DetectorSwitch::getPoseApriltagCallback(const tf2_msgs::TFMessage& msg)
 {
@@ -107,9 +168,10 @@ void DetectorSwitch::getPoseApriltagCallback(const tf2_msgs::TFMessage& msg)
 		apriltag_Pose_.pose.orientation.y = msg.transforms[0].transform.rotation.y;
 		apriltag_Pose_.pose.orientation.z = msg.transforms[0].transform.rotation.z;
 		apriltag_Pose_.pose.orientation.w = msg.transforms[0].transform.rotation.w;
-		detected_apriltag = true;
+		stable_apriltag = true;
 	}
 }
+
 void DetectorSwitch::getPoseWhyconCallback(const geometry_msgs::PoseArray& msg)
 {
 	last_time_whycon_ = TIME_NOW;
@@ -120,5 +182,5 @@ void DetectorSwitch::getPoseWhyconCallback(const geometry_msgs::PoseArray& msg)
 	whycon_Pose_.pose.orientation.y = msg.poses[0].orientation.y;
 	whycon_Pose_.pose.orientation.z = msg.poses[0].orientation.z;
 	whycon_Pose_.pose.orientation.w = msg.poses[0].orientation.w;
-	detected_whycon = true;
+	stable_whycon = true;
 }
