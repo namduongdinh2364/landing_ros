@@ -48,7 +48,7 @@ private:
 	ros::Subscriber sub_mavros_imu_data_;
 	ros::Subscriber sub_mavros_local_position_;
 	ros::Subscriber sub_marker_pose_;
-	ros::ServiceClient land_client_;
+    ros::ServiceServer land_service_;
 	ros::Timer markerPoseUpdate_loop_;
 	ros::Timer check_loop_;
 
@@ -61,7 +61,7 @@ private:
 	double cur_yaw_;
 	double m_yaw_;
 	int detect_failed_repeat_;
-	bool accept_landing;
+	bool accept_landing, start_landing_;
 	bool marker_detected_;
 	bool locked_trans_, locked_landing_, locked_inc_altitude_;
 
@@ -79,6 +79,7 @@ public:
 	void get_marker_pose_with_distance();
 	void get_marker_pose();
 	void setlandCallback(const std_msgs::Float32& msg);
+    bool enableLandCallback(std_srvs::SetBool::Request &request, std_srvs::SetBool::Response &response);
 };
 
 #endif

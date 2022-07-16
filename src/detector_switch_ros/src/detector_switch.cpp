@@ -23,15 +23,15 @@ DetectorSwitch::DetectorSwitch(const ros::NodeHandle& nh, const ros::NodeHandle&
 
 void DetectorSwitch::pubPoseCallback(const ros::TimerEvent& event)
 {
-	if((TIME_NOW - last_time_whycon_) > TIME_DURATION(0.5)) {
+	if((TIME_NOW - last_time_whycon_) > TIME_DURATION(1.0)) {
 		detected_whycon = false;
 	}
 
-	if((TIME_NOW - last_time_apriltag_) > TIME_DURATION(0.5)) {
+	if((TIME_NOW - last_time_apriltag_) > TIME_DURATION(1.0)) {
 		detected_apriltag = false;
 	}
 
-	if((TIME_NOW - last_time_aruco_) > TIME_DURATION(0.5)) {
+	if((TIME_NOW - last_time_aruco_) > TIME_DURATION(1.0)) {
 		detected_aruco = false;
 	}
 	switch (type_) {
@@ -60,25 +60,25 @@ void DetectorSwitch::pubPoseCallback(const ros::TimerEvent& event)
 					|| (!detected_apriltag && !detected_aruco))
 				{
 					pub_tf_.publish(whycon_Pose_);
-					// std::cout << "whycon is used" << std::endl;
+					std::cout << "Whycon is used | Z = " << cur_pose_.pose.position.z << std::endl;
 				}
 				else if(detected_apriltag && cur_pose_.pose.position.z < 4 || !detected_aruco && detected_apriltag) {
 					pub_tf_.publish(apriltag_Pose_);
-					// std::cout << "apriltag is used" << std::endl;
+					std::cout << "Apriltag is used | Z = " << cur_pose_.pose.position.z << std::endl;
 				}
 				else if(detected_aruco) {
 					pub_tf_.publish(aruco_Pose_);
-					// std::cout << "aruco is used" << std::endl;
+					std::cout << "Aruco is used | Z = " << cur_pose_.pose.position.z << std::endl;
 				}
 			}
 			else {
 				if (detected_apriltag && cur_pose_.pose.position.z < 4 || !detected_aruco && detected_apriltag) {
 					pub_tf_.publish(apriltag_Pose_);
-					// std::cout << "whycon isn't detected and apriltag is used" << std::endl;
+					std::cout << "Apriltag is used | Z = " << cur_pose_.pose.position.z << std::endl;
 				}
 				else if(detected_aruco) {
 					pub_tf_.publish(aruco_Pose_);
-					// std::cout << "whycon isn't detected and aruco is used" << std::endl;
+					std::cout << "Aruco is used | Z = " << cur_pose_.pose.position.z << std::endl;
 				}
 			}
 			break;

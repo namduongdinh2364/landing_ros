@@ -3,7 +3,7 @@
 #define PRECISION(x)    round(x * 100) / 100
 
 transformAdaption::transformAdaption(const ros::NodeHandle& nh, const ros::NodeHandle& nh_private)
-	: nh_(nh), nh_private_(nh_private), cur_yaw_(0), locked_trans_(false), accept_landing(false),
+	: nh_(nh), nh_private_(nh_private), cur_yaw_(0), locked_trans_(false), start_landing_(false),
 	locked_landing_(false)
 {
 	/*Public*/
@@ -23,7 +23,7 @@ transformAdaption::transformAdaption(const ros::NodeHandle& nh, const ros::NodeH
 	markerPoseUpdate_loop_ = nh_.createTimer(ros::Duration(0.1), &transformAdaption::loopCallback, this);
 	check_loop_ = nh_.createTimer(ros::Duration(0.1), &transformAdaption::checkloopCallback, this);
 
-	land_client_ = nh_.serviceClient<std_srvs::SetBool>("/land");
+    land_service_ = nh_.advertiseService("land2", &transformAdaption::enableLandCallback, this);
 	/* Rotation matrix from camera to UAV. It's customizable with different setup */
 	cam2drone_matrix_ << 0.0 , -1.0 , 0.0 , -1.0 , 0.0 , 0.0 , 0.0 , 0.0 , -1.0;
 
@@ -63,9 +63,6 @@ void transformAdaption::loopCallback(const ros::TimerEvent& event) {
 		desPose_.pose.position.x = PRECISION(markerPose_(0));
 		desPose_.pose.position.y = PRECISION(markerPose_(1));
 		desPose_.pose.position.z = 0.0;
-		if (cur_pose_(2) < 0.5) {
-			accept_landing = true;
-		}
 		pub_desPose_.publish(desPose_);
 
 		// if (abs(YAW_ANGLE(m_yaw_)) >= ERROR_ACCEPTANCE_YAW_DEGREES) {
@@ -86,7 +83,7 @@ void transformAdaption::checkloopCallback(const ros::TimerEvent& event) {
 	// 	ROS_WARN_STREAM("Enable Landing: UAV is approaded the maximum altitude");
 	// }
 	check_landing_constraints_loop();
-	// check_detect_timeout_loop();
+	check_detect_timeout_loop();
 }
 
 void transformAdaption::mavrosPose_Callback(const geometry_msgs::PoseStamped& msg)
@@ -147,15 +144,15 @@ void transformAdaption::imu_Callback(const sensor_msgs::Imu& msg)
 
 void transformAdaption::check_landing_constraints_loop()
 {
-	if (accept_landing && !locked_landing_) {
-		locked_landing_ = true;
-		std_srvs::SetBool land_cmd;
-		land_cmd.request.data = true;
-		land_client_.call(land_cmd);
-		ROS_WARN_STREAM("LANDING is required");
-		markerPoseUpdate_loop_.stop();
-		check_loop_.stop();
-	}
+	// if (accept_landing && !locked_landing_) {
+	// 	locked_landing_ = true;
+	// 	std_srvs::SetBool land_cmd;
+	// 	land_cmd.request.data = true;
+	// 	land_client_.call(land_cmd);
+	// 	ROS_WARN_STREAM("LANDING is required");
+	// 	markerPoseUpdate_loop_.stop();
+	// 	check_loop_.stop();
+	// }
 }
 
 void transformAdaption::check_detect_timeout_loop()
@@ -166,13 +163,13 @@ void transformAdaption::check_detect_timeout_loop()
 	 * Landing will be called.
 	 * TODO: Need to improve
 	 */
-	if((TIME_NOW - last_time_trans_) > TIME_DURATION(2.0) && marker_detected_) {
+	if(((TIME_NOW - last_time_trans_) > TIME_DURATION(2.0)) && start_landing_) {
 		static double new_altitude = 0;
-		if(TIME_NOW - timeout_repeat_trans_ > TIME_DURATION(2.0)) {
-			detect_failed_repeat_ ++;
-			timeout_repeat_trans_ = TIME_NOW;
-			ROS_INFO("Can't detect Marker %d", detect_failed_repeat_);
-		}
+		// if(TIME_NOW - timeout_repeat_trans_ > TIME_DURATION(2.0)) {
+		// 	detect_failed_repeat_ ++;
+		// 	timeout_repeat_trans_ = TIME_NOW;
+        ROS_INFO("Can't detect Marker");
+		// }
 		if(!locked_inc_altitude_) {
 			new_altitude = cur_pose_(2) + INCREASE_ALTITUDE_NOT_DETECT;
 		}
@@ -181,10 +178,10 @@ void transformAdaption::check_detect_timeout_loop()
 		desPose_.pose.position.x = cur_pose_(0);
 		desPose_.pose.position.y = cur_pose_(1);
 		desPose_.pose.position.z = new_altitude;
-		if((TIME_NOW - last_time_trans_ > TIME_DURATION(2 * MAX_REPEAT_DETECT)) || detect_failed_repeat_ == MAX_REPEAT_DETECT) {
-			accept_landing = true;
-			ROS_WARN_STREAM("Detection failed: Timeout");
-		}
+		// if((TIME_NOW - last_time_trans_ > TIME_DURATION(2 * MAX_REPEAT_DETECT)) || detect_failed_repeat_ == MAX_REPEAT_DETECT) {
+		// 	accept_landing = true;
+		// 	ROS_WARN_STREAM("Detection failed: Timeout");
+		// }
 		pub_desPose_.publish(desPose_);
 	}
 }
@@ -195,4 +192,9 @@ double transformAdaption::get_err_yaw(double d_yaw, double m_yaw)
 	err_degrees = YAW_ANGLE(d_yaw) - YAW_ANGLE(m_yaw);
 
 	return err_degrees * PI/180;
+}
+
+bool transformAdaption::enableLandCallback(std_srvs::SetBool::Request &request, std_srvs::SetBool::Response &response) {
+  start_landing_ = true;
+  return true;
 }
