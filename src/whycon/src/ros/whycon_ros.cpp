@@ -34,6 +34,7 @@ whycon::WhyConROS::WhyConROS(ros::NodeHandle& n) : is_tracking(false), should_re
 	int input_queue_size = 1;
 	n.param("input_queue_size", input_queue_size, input_queue_size);
 	cam_sub = it.subscribeCamera("/camera/color/image_raw", input_queue_size, boost::bind(&WhyConROS::on_image, this, _1, _2));
+	ArucoImage_sub = it.subscribe("/aruco_bundle/result", 1, &WhyConROS::ArucoImage_callback, this);
 
 	image_pub = n.advertise<sensor_msgs::Image>("image_out", 1);
 	poses_pub = n.advertise<geometry_msgs::PoseArray>("pose", 1);
@@ -41,6 +42,13 @@ whycon::WhyConROS::WhyConROS(ros::NodeHandle& n) : is_tracking(false), should_re
 	// projection_pub = n.advertise<whycon::Projection>("projection", 1);
 
 	reset_service = n.advertiseService("reset", &WhyConROS::reset, this);
+}
+
+void whycon::WhyConROS::ArucoImage_callback(const sensor_msgs::ImageConstPtr& msg)
+{
+	cv_bridge::CvImagePtr CVpArucoImage;
+	CVpArucoImage = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::RGB8);
+	MDrawImage = CVpArucoImage->image;
 }
 
 void whycon::WhyConROS::on_image(const sensor_msgs::ImageConstPtr& image_msg, const sensor_msgs::CameraInfoConstPtr& info_msg)
@@ -94,7 +102,7 @@ void whycon::WhyConROS::publish_results(const std_msgs::Header& header, const cv
 	// prepare image outpu
 	cv::Mat output_image;
 	if (publish_images)
-		output_image = cv_ptr->image.clone();
+		output_image = MDrawImage;
 
 	geometry_msgs::PoseArray pose_array;
 	

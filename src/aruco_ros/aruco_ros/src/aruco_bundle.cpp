@@ -53,6 +53,7 @@ class ArucoSimple
 {
 private:
 	cv::Mat inImage;
+	cv::Mat MDrawImage;
 	aruco::CameraParameters camParam;
 	tf::StampedTransform rightToLeft;
 	bool useRectifiedImages;
@@ -73,6 +74,7 @@ private:
 	ros::NodeHandle nh;
 	image_transport::ImageTransport it;
 	image_transport::Subscriber image_sub;
+	image_transport::Subscriber ApriltagImage_sub;
 
 	tf::TransformListener _tfListener;
 
@@ -82,7 +84,7 @@ public:
 	ArucoSimple() :
 	cam_info_received(false), nh("~"), it(nh)
 	{
-        /* Currently aruco map file use absolute path. */
+		/* Currently aruco map file use absolute path. */
 		TheMarkerMapConfig.readFromFile("/home/nam97/master/landing_ros/src/aruco_ros/aruco_ros/cfg/config.yml");
 
 		aruco::MarkerDetector::Params params = mDetector.getParameters();
@@ -120,6 +122,7 @@ public:
 		ROS_INFO_STREAM("Detection mode: " << detection_mode);
 
 		image_sub = it.subscribe("/image", 1, &ArucoSimple::image_callback, this);
+		ApriltagImage_sub = it.subscribe("/tag_detections_image", 1, &ArucoSimple::ApriltagImage_callback, this);
 		cam_info_sub = nh.subscribe("/camera_info", 1, &ArucoSimple::cam_info_callback, this);
 
 		image_pub = it.advertise("result", 1);
@@ -150,14 +153,11 @@ public:
 			ROS_ERROR_STREAM("Unable to get pose from TF: " << errMsg);
 			return false;
 		}
-		else
-		{
-			try
-			{
+		else {
+			try {
 				_tfListener.lookupTransform(refFrame, childFrame, ros::Time(0), transform);
 			}
-			catch (const tf::TransformException& e)
-			{
+			catch (const tf::TransformException& e) {
 				ROS_ERROR_STREAM("Error in lookupTransform of " << childFrame << " in " << refFrame);
 				return false;
 			}
@@ -166,26 +166,38 @@ public:
 		return true;
 	}
 
+	void ApriltagImage_callback(const sensor_msgs::ImageConstPtr& msg)
+	{
+		cv_bridge::CvImagePtr CVpApriltagImage;
+		CVpApriltagImage = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::RGB8);
+		MDrawImage = CVpApriltagImage->image;
+	}
+
 	void image_callback(const sensor_msgs::ImageConstPtr& msg)
 	{
-		if (cam_info_received)
-		{
+		if (cam_info_received) {
 			ros::Time curr_stamp = msg->header.stamp;
 			cv_bridge::CvImagePtr cv_ptr;
-			try
-			{
+			try {
 				cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::RGB8);
 				inImage = cv_ptr->image;
 
 				// detection results will go into "markers"
 				markers.clear();
 				vector<Marker> Markers = mDetector.detect(inImage);
+				vector<int> markers_from_set = TheMarkerMapConfig.getIndices(Markers);
+				for (auto idx : markers_from_set)
+					Markers[idx].draw(MDrawImage, Scalar(0, 0, 255), 2);
 				// detect the 3d camera location wrt the markerset (if possible)
-				if (TheMarkerMapConfig.isExpressedInMeters() && camParam.isValid())
-				{
-					MarkerMapPoseTracker MSPoseTracker;  // tracks the pose of the marker map
+				if (TheMarkerMapConfig.isExpressedInMeters() && camParam.isValid()) {
+					MarkerMapPoseTracker MSPoseTracker;
 					MSPoseTracker.setParams(camParam, TheMarkerMapConfig);
 					if (MSPoseTracker.estimatePose(Markers)) {
+						aruco::CvDrawingUtils::draw3dAxis(MDrawImage,
+														 camParam,
+														 MSPoseTracker.getRvec(),
+														 MSPoseTracker.getTvec(),
+														 TheMarkerMapConfig[0].getMarkerSize() * 2);
 						tf::Transform transform = aruco_ros::arucoMarkerMap2Tf(MSPoseTracker);
 						tf::StampedTransform cameraToReference;
 						cameraToReference.setIdentity();
@@ -202,9 +214,16 @@ public:
 						pose_pub.publish(poseMsg);
 					}
 				}
+				if (image_pub.getNumSubscribers() > 0) {
+					// show input with augmented information
+					cv_bridge::CvImage out_msg;
+					out_msg.header.stamp = curr_stamp;
+					out_msg.encoding = sensor_msgs::image_encodings::RGB8;
+					out_msg.image = MDrawImage;
+					image_pub.publish(out_msg.toImageMsg());
+				}
 			}
-			catch (cv_bridge::Exception& e)
-			{
+			catch (cv_bridge::Exception& e) {
 				ROS_ERROR("cv_bridge exception: %s", e.what());
 				return;
 			}
@@ -228,8 +247,7 @@ public:
 	void reconf_callback(aruco_ros::ArucoThresholdConfig &config, uint32_t level)
 	{
 		mDetector.setDetectionMode(aruco::DetectionMode(config.detection_mode), config.min_image_size);
-		if (config.normalizeImage)
-		{
+		if (config.normalizeImage) {
 			ROS_WARN("normalizeImageIllumination is unimplemented!");
 		}
 	}

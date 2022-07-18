@@ -16,7 +16,7 @@ namespace whycon {
 
 		void on_image(const sensor_msgs::ImageConstPtr& image_msg, const sensor_msgs::CameraInfoConstPtr& info_msg);
 		bool reset(std_srvs::Empty::Request& request, std_srvs::Empty::Response& response);
-
+		void ArucoImage_callback(const sensor_msgs::ImageConstPtr& msg);
 	private:
 		void load_transforms(void);
 		void publish_results(const std_msgs::Header& header, const cv_bridge::CvImageConstPtr& cv_ptr);
@@ -34,6 +34,7 @@ namespace whycon {
 
 		image_transport::ImageTransport it;
 		image_transport::CameraSubscriber cam_sub;
+		image_transport::Subscriber ArucoImage_sub;
 		ros::ServiceServer reset_service;
 
 		ros::Publisher image_pub, poses_pub, context_pub, projection_pub;
@@ -42,5 +43,6 @@ namespace whycon {
 		image_geometry::PinholeCameraModel camera_model;
 
 		bool transformation_loaded;
+		cv::Mat MDrawImage;
 	};
 }
