@@ -34,7 +34,7 @@ whycon::WhyConROS::WhyConROS(ros::NodeHandle& n) : is_tracking(false), should_re
 	int input_queue_size = 1;
 	n.param("input_queue_size", input_queue_size, input_queue_size);
 	cam_sub = it.subscribeCamera("/camera/color/image_raw", input_queue_size, boost::bind(&WhyConROS::on_image, this, _1, _2));
-	ArucoImage_sub = it.subscribe("/aruco_bundle/result", 1, &WhyConROS::ArucoImage_callback, this);
+	// ArucoImage_sub = it.subscribe("/aruco_bundle/result", 1, &WhyConROS::ArucoImage_callback, this);
 
 	image_pub = n.advertise<sensor_msgs::Image>("image_out", 1);
 	poses_pub = n.advertise<geometry_msgs::PoseArray>("pose", 1);
@@ -44,12 +44,12 @@ whycon::WhyConROS::WhyConROS(ros::NodeHandle& n) : is_tracking(false), should_re
 	reset_service = n.advertiseService("reset", &WhyConROS::reset, this);
 }
 
-void whycon::WhyConROS::ArucoImage_callback(const sensor_msgs::ImageConstPtr& msg)
-{
-	cv_bridge::CvImagePtr CVpArucoImage;
-	CVpArucoImage = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::RGB8);
-	MDrawImage = CVpArucoImage->image;
-}
+// void whycon::WhyConROS::ArucoImage_callback(const sensor_msgs::ImageConstPtr& msg)
+// {
+// 	cv_bridge::CvImagePtr CVpArucoImage;
+// 	CVpArucoImage = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::RGB8);
+// 	MDrawImage = CVpArucoImage->image;
+// }
 
 void whycon::WhyConROS::on_image(const sensor_msgs::ImageConstPtr& image_msg, const sensor_msgs::CameraInfoConstPtr& info_msg)
 {
@@ -102,7 +102,7 @@ void whycon::WhyConROS::publish_results(const std_msgs::Header& header, const cv
 	// prepare image outpu
 	cv::Mat output_image;
 	if (publish_images)
-		output_image = MDrawImage;
+		output_image = cv_ptr->image.clone();
 
 	geometry_msgs::PoseArray pose_array;
 	
@@ -120,6 +120,15 @@ void whycon::WhyConROS::publish_results(const std_msgs::Header& header, const cv
 			circle.draw(output_image, ostr.str(), cv::Vec3b(0,255,255));
 			/*whycon::CircleDetector::Circle new_circle = circle.improveEllipse(cv_ptr->image);
 			new_circle.draw(output_image, ostr.str(), cv::Vec3b(0,255,0));*/
+
+            cv::putText(output_image, //target image
+                        "Whycon is detected", //text
+                        cv::Point(30, 20), //top-left position
+                        cv::FONT_HERSHEY_DUPLEX,
+                        1.0,
+                        CV_RGB(100, 255, 0), //font color
+                        2);
+
 			cv::circle(output_image, camera_model.project3dToPixel(cv::Point3d(coord)), 1, cv::Scalar(255,0,255), 1, cv::LINE_AA);
 		}
 

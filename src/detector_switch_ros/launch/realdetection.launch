@@ -1,0 +1,11 @@
+<launch>
+  <arg name="launch_prefix" default="" />
+  <arg name="node_namespace" default="cctag_detector_node" />
+  <arg name="camera_name" default="/camera"/>
+  <arg name="image_topic" default="color/image_raw" />
+
+  <include file="$(find apriltag_ros)/launch/continuous_detection.launch"></include>
+  <include file="$(find aruco_ros)/launch/bundle.launch"></include>
+  <include file="$(find whycon)/launch/whycon.launch"></include>
+  <!-- <node name="rviz" pkg="rviz" type="rviz" args="-d $(find detector)/rviz/urdf.rviz" required="true"/> -->
+</launch>

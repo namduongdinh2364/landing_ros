@@ -18,8 +18,15 @@ find_package(catkin REQUIRED COMPONENTS
   cv_bridge
 )
 
+find_package(OpenCV REQUIRED)
+set(CMAKE_CXX_STANDARD 11) # C++11...
+set(CMAKE_CXX_STANDARD_REQUIRED ON) #...is required...
+set(CMAKE_CXX_EXTENSIONS ON) #...with compiler extensions like gnu++11
+
+
 catkin_package(
   INCLUDE_DIRS include
+  LIBRARIES aruco
   CATKIN_DEPENDS roscpp rospy std_msgs cv_bridge sensor_msgs image_transport geometry_msgs
 )
 
@@ -40,8 +47,15 @@ file(GLOB SOURCES_1
                 src/transform_adaption.cpp
 )
 
+file(GLOB SOURCES_2
+                src/aruco_detector.cpp
+)
+
 add_executable(${PROJECT_NAME}_node ${SOURCES})
 target_link_libraries(${PROJECT_NAME}_node ${catkin_LIBRARIES})
 
 add_executable(transform_adaption_node ${SOURCES_1})
 target_link_libraries(transform_adaption_node ${catkin_LIBRARIES})
+
+add_executable(aruco_detector_node ${SOURCES_2})
+target_link_libraries(aruco_detector_node ${catkin_LIBRARIES})

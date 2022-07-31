@@ -82,17 +82,17 @@ void DetectorSwitch::pubPoseCallback(const ros::TimerEvent& event)
 	 */
 	if((TIME_NOW - last_time_whycon_) > TIME_DURATION(0.3)) {
 		detected_whycon = false;
-		ROS_WARN_STREAM("Whycon is unstable");
+		// ROS_WARN_STREAM("Whycon is unstable");
 	}
 
 	if((TIME_NOW - last_time_aruco_) > TIME_DURATION(0.3)) {
 		detected_aruco = false;
-		ROS_WARN_STREAM("Aruco is unstable");
+		// ROS_WARN_STREAM("Aruco is unstable");
 	}
 
 	if((TIME_NOW - last_time_apriltag_) > TIME_DURATION(0.3)) {
 		detected_apriltag = false;
-		ROS_WARN_STREAM("Apriltag is unstable");
+		// ROS_WARN_STREAM("Apriltag is unstable");
 	}
 
 	switch (type_) {
