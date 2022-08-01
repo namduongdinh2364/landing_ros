@@ -59,3 +59,6 @@ target_link_libraries(transform_adaption_node ${catkin_LIBRARIES})
 
 add_executable(aruco_detector_node ${SOURCES_2})
 target_link_libraries(aruco_detector_node ${catkin_LIBRARIES})
+
+add_executable(cam_info_node src/cam_info.cpp)
+target_link_libraries(cam_info_node ${catkin_LIBRARIES})
