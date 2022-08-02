@@ -1,0 +1,27 @@
+[  0%] Built target std_msgs_generate_messages_cpp
+[  0%] Built target sensor_msgs_generate_messages_cpp
+[  0%] Built target geometry_msgs_generate_messages_cpp
+[  0%] Built target sensor_msgs_generate_messages_py
+[  0%] Built target std_msgs_generate_messages_py
+[  0%] Built target geometry_msgs_generate_messages_py
+[  0%] Built target _apriltag_ros_generate_messages_check_deps_AprilTagDetectionArray
+[  0%] Built target geometry_msgs_generate_messages_eus
+[  0%] Built target std_msgs_generate_messages_eus
+[  0%] Built target _apriltag_ros_generate_messages_check_deps_AnalyzeSingleImage
+[  0%] Built target _apriltag_ros_generate_messages_check_deps_AprilTagDetection
+[  0%] Built target sensor_msgs_generate_messages_eus
+[  0%] Built target std_msgs_generate_messages_nodejs
+[  0%] Built target geometry_msgs_generate_messages_nodejs
+[  0%] Built target sensor_msgs_generate_messages_nodejs
+[  0%] Built target std_msgs_generate_messages_lisp
+[  0%] Built target sensor_msgs_generate_messages_lisp
+[  0%] Built target geometry_msgs_generate_messages_lisp
+[ 16%] Built target apriltag_ros_generate_messages_eus
+[ 37%] Built target apriltag_ros_generate_messages_cpp
+[ 50%] Built target apriltag_ros_generate_messages_py
+[ 62%] Built target apriltag_ros_generate_messages_nodejs
+[ 75%] Built target apriltag_ros_generate_messages_lisp
+[ 75%] Built target apriltag_ros_generate_messages
+[ 83%] Built target apriltag_ros_common
+[ 91%] Built target apriltag_ros_continuous_detector
+[100%] Built target apriltag_ros_continuous_node

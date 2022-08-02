@@ -1,0 +1,7 @@
+[35m[1mScanning dependencies of target aruco_detector_node[0m
+[ 70%] Built target transform_adaption_node
+[ 70%] Built target cam_info_node
+[ 80%] Built target detector_switch_ros_node
+[ 90%] [32mBuilding CXX object CMakeFiles/aruco_detector_node.dir/src/aruco_detector.cpp.o[0m
+[100%] [32m[1mLinking CXX executable /home/ducanh/ducanh_ws/landing_uav/landing_ros/devel/lib/detector_switch_ros/aruco_detector_node[0m
+[100%] Built target aruco_detector_node

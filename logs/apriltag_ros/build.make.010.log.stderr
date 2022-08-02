@@ -1,0 +1,37 @@
+[01m[K/home/ducanh/ducanh_ws/landing_uav/landing_ros/src/apriltag_ros/apriltag_ros/src/continuous_detector.cpp:[m[K In member function ‘[01m[Kvirtual void apriltag_ros::ContinuousDetector::onInit()[m[K’:
+[01m[K/home/ducanh/ducanh_ws/landing_uav/landing_ros/src/apriltag_ros/apriltag_ros/src/continuous_detector.cpp:57:74:[m[K [01;31m[Kerror: [m[Kno matching function for call to ‘[01m[Kimage_transport::ImageTransport::subscribeCamera(const char [11], int, void (apriltag_ros::ContinuousDetector::*)(const ImageConstPtr&), apriltag_ros::ContinuousDetector*, image_transport::TransportHints)[m[K’
+   57 |                           image_transport::TransportHints(transport_hint)[01;31m[K)[m[K;
+      |                                                                          [01;31m[K^[m[K
+In file included from [01m[K/home/ducanh/ducanh_ws/landing_uav/landing_ros/src/apriltag_ros/apriltag_ros/include/apriltag_ros/common_functions.h:61[m[K,
+                 from [01m[K/home/ducanh/ducanh_ws/landing_uav/landing_ros/src/apriltag_ros/apriltag_ros/include/apriltag_ros/continuous_detector.h:46[m[K,
+                 from [01m[K/home/ducanh/ducanh_ws/landing_uav/landing_ros/src/apriltag_ros/apriltag_ros/src/continuous_detector.cpp:32[m[K:
+[01m[K/opt/ros/noetic/include/image_transport/image_transport.h:138:20:[m[K [01;36m[Knote: [m[Kcandidate: ‘[01m[Kimage_transport::CameraSubscriber image_transport::ImageTransport::subscribeCamera(const string&, uint32_t, const Callback&, const VoidPtr&, const image_transport::TransportHints&)[m[K’
+  138 |   CameraSubscriber [01;36m[KsubscribeCamera[m[K(const std::string& base_topic, uint32_t queue_size,
+      |                    [01;36m[K^~~~~~~~~~~~~~~[m[K
+[01m[K/opt/ros/noetic/include/image_transport/image_transport.h:140:56:[m[K [01;36m[Knote: [m[K  no known conversion for argument 4 from ‘[01m[Kapriltag_ros::ContinuousDetector*[m[K’ to ‘[01m[Kconst VoidPtr&[m[K’ {aka ‘[01m[Kconst boost::shared_ptr<void>&[m[K’}
+  140 |                                    [01;36m[Kconst ros::VoidPtr& tracked_object = ros::VoidPtr()[m[K,
+      |                                    [01;36m[K~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[m[K
+[01m[K/opt/ros/noetic/include/image_transport/image_transport.h:146:20:[m[K [01;36m[Knote: [m[Kcandidate: ‘[01m[Kimage_transport::CameraSubscriber image_transport::ImageTransport::subscribeCamera(const string&, uint32_t, void (*)(const ImageConstPtr&, const CameraInfoConstPtr&), const image_transport::TransportHints&)[m[K’
+  146 |   CameraSubscriber [01;36m[KsubscribeCamera[m[K(const std::string& base_topic, uint32_t queue_size,
+      |                    [01;36m[K^~~~~~~~~~~~~~~[m[K
+[01m[K/opt/ros/noetic/include/image_transport/image_transport.h:146:20:[m[K [01;36m[Knote: [m[K  candidate expects 4 arguments, 5 provided
+[01m[K/opt/ros/noetic/include/image_transport/image_transport.h:160:20:[m[K [01;36m[Knote: [m[Kcandidate: ‘[01m[Ktemplate<class T> image_transport::CameraSubscriber image_transport::ImageTransport::subscribeCamera(const string&, uint32_t, void (T::*)(const ImageConstPtr&, const CameraInfoConstPtr&), T*, const image_transport::TransportHints&)[m[K’
+  160 |   CameraSubscriber [01;36m[KsubscribeCamera[m[K(const std::string& base_topic, uint32_t queue_size,
+      |                    [01;36m[K^~~~~~~~~~~~~~~[m[K
+[01m[K/opt/ros/noetic/include/image_transport/image_transport.h:160:20:[m[K [01;36m[Knote: [m[K  template argument deduction/substitution failed:
+[01m[K/home/ducanh/ducanh_ws/landing_uav/landing_ros/src/apriltag_ros/apriltag_ros/src/continuous_detector.cpp:57:74:[m[K [01;36m[Knote: [m[K  candidate expects 3 arguments, 2 provided
+   57 |                           image_transport::TransportHints(transport_hint)[01;36m[K)[m[K;
+      |                                                                          [01;36m[K^[m[K
+In file included from [01m[K/home/ducanh/ducanh_ws/landing_uav/landing_ros/src/apriltag_ros/apriltag_ros/include/apriltag_ros/common_functions.h:61[m[K,
+                 from [01m[K/home/ducanh/ducanh_ws/landing_uav/landing_ros/src/apriltag_ros/apriltag_ros/include/apriltag_ros/continuous_detector.h:46[m[K,
+                 from [01m[K/home/ducanh/ducanh_ws/landing_uav/landing_ros/src/apriltag_ros/apriltag_ros/src/continuous_detector.cpp:32[m[K:
+[01m[K/opt/ros/noetic/include/image_transport/image_transport.h:174:20:[m[K [01;36m[Knote: [m[Kcandidate: ‘[01m[Ktemplate<class T> image_transport::CameraSubscriber image_transport::ImageTransport::subscribeCamera(const string&, uint32_t, void (T::*)(const ImageConstPtr&, const CameraInfoConstPtr&), const boost::shared_ptr<X>&, const image_transport::TransportHints&)[m[K’
+  174 |   CameraSubscriber [01;36m[KsubscribeCamera[m[K(const std::string& base_topic, uint32_t queue_size,
+      |                    [01;36m[K^~~~~~~~~~~~~~~[m[K
+[01m[K/opt/ros/noetic/include/image_transport/image_transport.h:174:20:[m[K [01;36m[Knote: [m[K  template argument deduction/substitution failed:
+[01m[K/home/ducanh/ducanh_ws/landing_uav/landing_ros/src/apriltag_ros/apriltag_ros/src/continuous_detector.cpp:57:74:[m[K [01;36m[Knote: [m[K  candidate expects 3 arguments, 2 provided
+   57 |                           image_transport::TransportHints(transport_hint)[01;36m[K)[m[K;
+      |                                                                          [01;36m[K^[m[K
+make[2]: *** [CMakeFiles/apriltag_ros_continuous_detector.dir/build.make:63: CMakeFiles/apriltag_ros_continuous_detector.dir/src/continuous_detector.cpp.o] Error 1
+make[1]: *** [CMakeFiles/Makefile2:243: CMakeFiles/apriltag_ros_continuous_detector.dir/all] Error 2
+make: *** [Makefile:141: all] Error 2

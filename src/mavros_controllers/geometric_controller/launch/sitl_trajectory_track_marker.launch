@@ -51,11 +51,11 @@
   </include>
 
   <!-- <include file="$(find aruco_ros)/launch/bundle.launch"></include> -->
-  <include file="$(find apriltag_ros)/launch/continuous_detection.launch"></include>
+  <!-- <include file="$(find apriltag_ros)/launch/continuous_detection.launch"></include> -->
   <include file="$(find whycon)/launch/whycon.launch"></include>
 
   <node pkg="detector_switch_ros" type="transform_adaption_node" name="transform_adaption" output="screen"> </node>
   <node pkg="detector_switch_ros" type="detector_switch_ros_node" name="detector_switch" output="screen"> </node>
-  <node pkg="detector_switch_ros" type="aruco_detector_node" name="aruco_detector" output="screen"> </node>
+  <!-- <node pkg="detector_switch_ros" type="aruco_detector_node" name="aruco_detector" output="screen"> </node> -->
 
 </launch>

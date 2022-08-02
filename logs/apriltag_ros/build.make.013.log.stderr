@@ -1,0 +1,7 @@
+[01m[K/home/ducanh/ducanh_ws/landing_uav/landing_ros/src/apriltag_ros/apriltag_ros/src/continuous_detector.cpp:[m[K In member function ‘[01m[Kvirtual void apriltag_ros::ContinuousDetector::onInit()[m[K’:
+[01m[K/home/ducanh/ducanh_ws/landing_uav/landing_ros/src/apriltag_ros/apriltag_ros/src/continuous_detector.cpp:59:9:[m[K [01;31m[Kerror: [m[K‘[01m[Kclass std::shared_ptr<image_transport::ImageTransport>[m[K’ has no member named ‘[01m[Ksubscribe[m[K’
+   59 |     it_.[01;31m[Ksubscribe[m[K("/rgb", 1,
+      |         [01;31m[K^~~~~~~~~[m[K
+make[2]: *** [CMakeFiles/apriltag_ros_continuous_detector.dir/build.make:63: CMakeFiles/apriltag_ros_continuous_detector.dir/src/continuous_detector.cpp.o] Error 1
+make[1]: *** [CMakeFiles/Makefile2:243: CMakeFiles/apriltag_ros_continuous_detector.dir/all] Error 2
+make: *** [Makefile:141: all] Error 2

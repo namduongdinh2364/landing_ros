@@ -1,0 +1,8 @@
+prefix=/home/ducanh/ducanh_ws/landing_uav/landing_ros/devel
+
+Name: detector_switch_ros
+Description: Description of detector_switch_ros
+Version: 0.0.0
+Cflags: -I/home/ducanh/ducanh_ws/landing_uav/landing_ros/src/detector_switch_ros/include
+Libs: -L${prefix}/lib -laruco
+Requires: roscpp rospy std_msgs cv_bridge sensor_msgs image_transport geometry_msgs

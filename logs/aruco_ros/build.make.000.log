@@ -1,0 +1,14 @@
+[35m[1mScanning dependencies of target aruco_ros_gencfg[0m
+[ 16%] [34m[1mGenerating dynamic reconfigure files from cfg/ArucoThreshold.cfg: /home/ducanh/ducanh_ws/landing_uav/landing_ros/devel/include/aruco_ros/ArucoThresholdConfig.h /home/ducanh/ducanh_ws/landing_uav/landing_ros/devel/lib/python3/dist-packages/aruco_ros/cfg/ArucoThresholdConfig.py[0m
+Generating reconfiguration files for ArucoThreshold in aruco_ros
+Wrote header file in /home/ducanh/ducanh_ws/landing_uav/landing_ros/devel/include/aruco_ros/ArucoThresholdConfig.h
+[ 16%] Built target aruco_ros_gencfg
+[35m[1mScanning dependencies of target aruco_ros_utils[0m
+[ 33%] [32mBuilding CXX object CMakeFiles/aruco_ros_utils.dir/src/aruco_ros_utils.cpp.o[0m
+[35m[1mScanning dependencies of target bundle[0m
+[ 50%] [32mBuilding CXX object CMakeFiles/bundle.dir/src/aruco_bundle.cpp.o[0m
+[ 66%] [32mBuilding CXX object CMakeFiles/bundle.dir/src/aruco_ros_utils.cpp.o[0m
+[ 83%] [32m[1mLinking CXX shared library /home/ducanh/ducanh_ws/landing_uav/landing_ros/devel/lib/libaruco_ros_utils.so[0m
+[ 83%] Built target aruco_ros_utils
+[100%] [32m[1mLinking CXX executable /home/ducanh/ducanh_ws/landing_uav/landing_ros/devel/lib/aruco_ros/bundle[0m
+[100%] Built target bundle

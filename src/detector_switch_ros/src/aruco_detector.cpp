@@ -36,7 +36,7 @@ private:
 public:
 	ArucoDetector() : nh("~"), it(nh)
 	{
-		image_sub = it.subscribe("/camera/color/image_raw", 1, &ArucoDetector::image_callback, this);
+		image_sub = it.subscribe("/rgb", 1, &ArucoDetector::image_callback, this);
 		cam_info_sub = nh.subscribe("/camera/color/camera_info", 1, &ArucoDetector::cam_info_callback, this);
 		image_pub = it.advertise("result", 1);
 		pose_pub = nh.advertise<geometry_msgs::PoseStamped>("pose", 10);
@@ -90,11 +90,12 @@ public:
 
 	void image_callback(const sensor_msgs::ImageConstPtr& msg)
 	{
-		if ((image_pub.getNumSubscribers() == 0) && (pose_pub.getNumSubscribers() == 0))
-		{
-			ROS_DEBUG("No subscribers, not looking for ArUco markers");
-			return;
-		}
+		// if ((image_pub.getNumSubscribers() == 0) && (pose_pub.getNumSubscribers() == 0))
+		// {
+		// 	ROS_DEBUG("No subscribers, not looking for ArUco markers");
+		// 	return;
+		// }
+		// std::cout << "2" << std::endl;
 
 		if (cam_info_received)
 		{
@@ -126,6 +127,7 @@ public:
 						poseMsg.pose.position.y = tvec.at<double>(1);
 						poseMsg.pose.position.z = tvec.at<double>(2);
 						pose_pub.publish(poseMsg);
+						std::cout << "tvec: " << tvec << std::endl;
 					}
 					
 					// std::cout << "tvec: " << tvec << std::endl;
@@ -153,7 +155,7 @@ public:
 	void cam_info_callback(const sensor_msgs::CameraInfo &msg)
 	{
 		int i;
-
+		std::cout << "1" << std::endl;
 		for (i = 0; i < 9; i++) {
 			cameraMatrix.at<double>(0, i) = msg.K[i];
 			// std::cout << cameraMatrix.at<float>(0, i) << "---"<< std::endl;

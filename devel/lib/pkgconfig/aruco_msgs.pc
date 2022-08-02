@@ -1,0 +1,8 @@
+prefix=/home/ducanh/ducanh_ws/landing_uav/landing_ros/devel
+
+Name: aruco_msgs
+Description: Description of aruco_msgs
+Version: 3.0.3
+Cflags: -I/home/ducanh/ducanh_ws/landing_uav/landing_ros/devel/include
+Libs: -L${prefix}/lib 
+Requires: message_runtime geometry_msgs std_msgs

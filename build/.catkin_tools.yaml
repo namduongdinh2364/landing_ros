@@ -1,0 +1,6 @@
+devel_space: /home/ducanh/ducanh_ws/landing_uav/landing_ros/devel
+install: false
+install_space: /home/ducanh/ducanh_ws/landing_uav/landing_ros/install
+profile: default
+source_space: /home/ducanh/ducanh_ws/landing_uav/landing_ros/src
+workspace: /home/ducanh/ducanh_ws/landing_uav/landing_ros

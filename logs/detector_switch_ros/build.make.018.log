@@ -1,0 +1,4 @@
+[ 50%] Built target transform_adaption_node
+[ 50%] Built target cam_info_node
+[ 70%] Built target aruco_detector_node
+[100%] Built target detector_switch_ros_node

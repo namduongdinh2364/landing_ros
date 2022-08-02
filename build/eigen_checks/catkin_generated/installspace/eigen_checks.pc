@@ -1,0 +1,8 @@
+prefix=/home/ducanh/ducanh_ws/landing_uav/landing_ros/install
+
+Name: eigen_checks
+Description: Description of eigen_checks
+Version: 0.0.1
+Cflags: -I${prefix}/include
+Libs: -L${prefix}/lib -leigen_checks
+Requires: 

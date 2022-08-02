@@ -1,0 +1,18 @@
+[  0%] Built target geometry_msgs_generate_messages_nodejs
+[  0%] Built target geometry_msgs_generate_messages_py
+[  0%] Built target geometry_msgs_generate_messages_cpp
+[  0%] Built target geometry_msgs_generate_messages_lisp
+[ 15%] Built target whycon
+[ 15%] Built target geometry_msgs_generate_messages_eus
+[ 15%] Built target _whycon_generate_messages_check_deps_Projection
+[ 23%] Built target whycon_generate_messages_py
+[ 26%] Built target whycon_generate_messages_nodejs
+[ 34%] Built target whycon_generate_messages_eus
+[ 38%] Built target whycon_generate_messages_cpp
+[ 42%] Built target whycon_generate_messages_lisp
+[ 42%] Built target whycon_generate_messages
+[ 53%] Built target set_axis
+[ 76%] Built target robot_pose_publisher
+[ 76%] Built target whycon-node
+[100%] Built target whycon_nodelet
+[100%] Built target transformer

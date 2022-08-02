@@ -1,0 +1,8 @@
+prefix=/home/ducanh/ducanh_ws/landing_uav/landing_ros/install
+
+Name: aruco
+Description: Description of aruco
+Version: 3.0.3
+Cflags: -I${prefix}/include
+Libs: -L${prefix}/lib -laruco
+Requires: 

@@ -1,0 +1,8 @@
+prefix=/home/ducanh/ducanh_ws/landing_uav/landing_ros/devel
+
+Name: controller_msgs
+Description: Description of controller_msgs
+Version: 0.0.1
+Cflags: -I/home/ducanh/ducanh_ws/landing_uav/landing_ros/devel/include -I/home/ducanh/ducanh_ws/landing_uav/landing_ros/src/mavros_controllers/controller_msgs/include
+Libs: -L${prefix}/lib 
+Requires: geometry_msgs sensor_msgs message_runtime std_msgs

@@ -1,0 +1,6 @@
+[ 16%] Built target aruco_ros_gencfg
+[ 50%] Built target aruco_ros_utils
+[35m[1mScanning dependencies of target bundle[0m
+[ 66%] [32mBuilding CXX object CMakeFiles/bundle.dir/src/aruco_bundle.cpp.o[0m
+[ 83%] [32m[1mLinking CXX executable /home/ducanh/ducanh_ws/landing_uav/landing_ros/devel/lib/aruco_ros/bundle[0m
+[100%] Built target bundle

@@ -1,0 +1,30 @@
+[01m[K/home/ducanh/ducanh_ws/landing_uav/landing_ros/src/whycon/src/lib/circle_detector.cpp:[m[K In member function ‘[01m[Kwhycon::CircleDetector::Circle whycon::CircleDetector::detect(const cv::Mat&, bool&, const whycon::CircleDetector::Circle&)[m[K’:
+[01m[K/home/ducanh/ducanh_ws/landing_uav/landing_ros/src/whycon/src/lib/circle_detector.cpp:452:3:[m[K [01;35m[Kwarning: [m[Kthis ‘[01m[Kelse[m[K’ clause does not guard... [[01;35m[K-Wmisleading-indentation[m[K]
+  452 |   [01;35m[Kelse[m[K WHYCON_DEBUG("detected at " << inner.x << " " << inner.y);
+      |   [01;35m[K^~~~[m[K
+[01m[K/home/ducanh/ducanh_ws/landing_uav/landing_ros/src/whycon/src/lib/circle_detector.cpp:453:2:[m[K [01;36m[Knote: [m[K...this statement, but the latter is misleadingly indented as if it were guarded by the ‘[01m[Kelse[m[K’
+  453 |  [01;36m[Kreturn[m[K inner;
+      |  [01;36m[K^~~~~~[m[K
+[01m[K/home/ducanh/ducanh_ws/landing_uav/landing_ros/src/whycon/src/lib/circle_detector.cpp:423:111:[m[K [01;35m[Kwarning: [m[K‘[01m[Klocal_y[m[K’ may be used uninitialized in this function [[01;35m[K-Wmaybe-uninitialized[m[K]
+  423 |    if (local_x >= local_window_x + local_window_width || local_x >= width) { local_x = local_window_x; [01;35m[Klocal_y++[m[K; }
+      |                                                                                                        [01;35m[K~~~~~~~^~[m[K
+[01m[K/home/ducanh/ducanh_ws/landing_uav/landing_ros/src/whycon/src/lib/circle_detector.cpp:422:11:[m[K [01;35m[Kwarning: [m[K‘[01m[Klocal_x[m[K’ may be used uninitialized in this function [[01;35m[K-Wmaybe-uninitialized[m[K]
+  422 |    [01;35m[Klocal_x++[m[K;
+      |    [01;35m[K~~~~~~~^~[m[K
+In file included from [01m[K/opt/ros/noetic/include/tf/LinearMath/Matrix3x3.h:19[m[K,
+                 from [01m[K/opt/ros/noetic/include/tf/LinearMath/Transform.h:21[m[K,
+                 from [01m[K/opt/ros/noetic/include/tf/transform_datatypes.h:41[m[K,
+                 from [01m[K/opt/ros/noetic/include/tf/time_cache.h:38[m[K,
+                 from [01m[K/opt/ros/noetic/include/tf/tf.h:44[m[K,
+                 from [01m[K/home/ducanh/ducanh_ws/landing_uav/landing_ros/src/whycon/src/ros/set_axis.h:5[m[K,
+                 from [01m[K/home/ducanh/ducanh_ws/landing_uav/landing_ros/src/whycon/src/ros/set_axis.cpp:4[m[K:
+[01m[K/opt/ros/noetic/include/tf/LinearMath/Vector3.h:[m[K In member function ‘[01m[Ktf::Transform whycon::AxisSetter::compute_similarity(const std::vector<tf::Vector3>&)[m[K’:
+[01m[K/opt/ros/noetic/include/tf/LinearMath/Vector3.h:376:62:[m[K [01;35m[Kwarning: [m[K‘[01m[K*((void*)(& rot_transform)+96).tf::Vector3::m_floats[2][m[K’ is used uninitialized in this function [[01;35m[K-Wuninitialized[m[K]
+  376 |  return Vector3(-v.m_floats[0], -v.m_floats[1], -[01;35m[Kv.m_floats[2][m[K);
+      |                                                  [01;35m[K~~~~~~~~~~~~^[m[K
+[01m[K/opt/ros/noetic/include/tf/LinearMath/Vector3.h:376:46:[m[K [01;35m[Kwarning: [m[K‘[01m[K*((void*)(& rot_transform)+96).tf::Vector3::m_floats[1][m[K’ is used uninitialized in this function [[01;35m[K-Wuninitialized[m[K]
+  376 |  return Vector3(-v.m_floats[0], -[01;35m[Kv.m_floats[1][m[K, -v.m_floats[2]);
+      |                                  [01;35m[K~~~~~~~~~~~~^[m[K
+[01m[K/opt/ros/noetic/include/tf/LinearMath/Vector3.h:376:30:[m[K [01;35m[Kwarning: [m[K‘[01m[K*((void*)(& rot_transform)+96).tf::Vector3::m_floats[0][m[K’ is used uninitialized in this function [[01;35m[K-Wuninitialized[m[K]
+  376 |  return Vector3(-[01;35m[Kv.m_floats[0][m[K, -v.m_floats[1], -v.m_floats[2]);
+      |                  [01;35m[K~~~~~~~~~~~~^[m[K

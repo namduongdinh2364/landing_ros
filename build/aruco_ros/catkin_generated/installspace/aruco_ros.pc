@@ -1,0 +1,8 @@
+prefix=/home/ducanh/ducanh_ws/landing_uav/landing_ros/install
+
+Name: aruco_ros
+Description: Description of aruco_ros
+Version: 3.0.3
+Cflags: -I${prefix}/include
+Libs: -L${prefix}/lib -laruco_ros_utils
+Requires: aruco sensor_msgs tf

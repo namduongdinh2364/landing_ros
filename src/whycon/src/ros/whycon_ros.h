@@ -41,7 +41,7 @@ namespace whycon {
 		boost::shared_ptr<tf::TransformBroadcaster>	transform_broadcaster;
 
 		image_geometry::PinholeCameraModel camera_model;
-
+		
 		bool transformation_loaded;
 		// cv::Mat MDrawImage;
 	};

@@ -1,0 +1,8 @@
+prefix=/home/ducanh/ducanh_ws/landing_uav/landing_ros/devel
+
+Name: eigen_catkin
+Description: Description of eigen_catkin
+Version: 3.2.12
+Cflags: -I/usr/include/eigen3
+Libs: -L${prefix}/lib 
+Requires: 

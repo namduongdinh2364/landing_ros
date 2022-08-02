@@ -1,0 +1,8 @@
+prefix=/home/ducanh/ducanh_ws/landing_uav/landing_ros/install
+
+Name: nlopt
+Description: Description of nlopt
+Version: 2.4.1
+Cflags: -I${prefix}/include
+Libs: -L${prefix}/lib -lnlopt_wrap
+Requires: 

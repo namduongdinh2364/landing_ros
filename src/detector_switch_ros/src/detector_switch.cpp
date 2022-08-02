@@ -12,7 +12,7 @@ DetectorSwitch::DetectorSwitch(const ros::NodeHandle& nh, const ros::NodeHandle&
 	sub_mavros_local_position_ = nh_private_.subscribe
 		("/mavros/local_position/pose", 1, &DetectorSwitch::mavrosPose_Callback, this, ros::TransportHints().tcpNoDelay());
 	sub_tf_aruco_ = nh_.subscribe
-		("/aruco_bundle/pose", 1, &DetectorSwitch::getPoseArucoCallback, this, ros::TransportHints().tcpNoDelay());
+		("/aruco_detector/pose", 1, &DetectorSwitch::getPoseArucoCallback, this, ros::TransportHints().tcpNoDelay());
 	sub_tf_apriltag_ = nh_.subscribe
 		("/tf", 1, &DetectorSwitch::getPoseApriltagCallback, this, ros::TransportHints().tcpNoDelay());
 	sub_tf_whycon_ = nh_.subscribe

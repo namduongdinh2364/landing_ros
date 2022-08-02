@@ -1,0 +1,1 @@
+/usr/bin/cc -O3 -DNDEBUG  -rdynamic CMakeFiles/apriltag_demo.dir/example/apriltag_demo.c.o  -o apriltag_demo  -Wl,-rpath,/home/ducanh/ducanh_ws/landing_uav/landing_ros/build/apriltag: libapriltag.so.3.2.0 -lpthread -lm 
