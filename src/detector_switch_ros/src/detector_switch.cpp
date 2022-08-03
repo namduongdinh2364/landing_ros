@@ -8,6 +8,8 @@ DetectorSwitch::DetectorSwitch(const ros::NodeHandle& nh, const ros::NodeHandle&
 	detected_whycon = false;
 	pub_tf_ = nh_.advertise<geometry_msgs::PoseStamped>
 		("/tf_marker", 1);
+	pub_desPose_ = nh_.advertise<geometry_msgs::PoseStamped>
+		("cmd/set_desposition/local", 1);
 
 	sub_mavros_local_position_ = nh_private_.subscribe
 		("/mavros/local_position/pose", 1, &DetectorSwitch::mavrosPose_Callback, this, ros::TransportHints().tcpNoDelay());
@@ -106,7 +108,7 @@ void DetectorSwitch::pubPoseCallback(const ros::TimerEvent& event)
 			break;
 		case 3:
 			if(detected_whycon)
-				pub_tf_.publish(whycon_Pose_);
+				pub_desPose_.publish(whycon_Pose_);
 			break;
 		default:
 			/*
@@ -120,7 +122,7 @@ void DetectorSwitch::pubPoseCallback(const ros::TimerEvent& event)
 				if(sqrt(pow(whycon_Pose_.pose.position.x,2) + pow(whycon_Pose_.pose.position.y,2)) > 1.5 
 					|| (!detected_apriltag && !detected_aruco))
 				{
-					pub_tf_.publish(whycon_Pose_);
+					pub_desPose_.publish(whycon_Pose_);
 					std::cout << "Whycon is used | Z = " << cur_pose_.pose.position.z << std::endl;
 				}
 				else if(detected_apriltag && cur_pose_.pose.position.z < 4 || !detected_aruco && detected_apriltag) {
@@ -151,12 +153,15 @@ void DetectorSwitch::mavrosPose_Callback(const geometry_msgs::PoseStamped& msg)
 	cur_pose_ = msg;
 }
 
+/* Get Position of marker Aruco in camera frame */
 void DetectorSwitch::getPoseArucoCallback(const geometry_msgs::PoseStamped& msg)
 {
 	last_time_aruco_ = TIME_NOW;
 	aruco_Pose_ = msg;
 	stable_aruco = true;
 }
+
+/* Get Position of marker AprilTag in camera frame */
 void DetectorSwitch::getPoseApriltagCallback(const tf2_msgs::TFMessage& msg)
 {
 	if(msg.transforms[0].child_frame_id == "apriltag_bundle") {

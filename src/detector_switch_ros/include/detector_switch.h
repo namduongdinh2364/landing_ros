@@ -30,6 +30,7 @@ private:
 	ros::Timer stable_loop_;
 	ros::Subscriber sub_mavros_local_position_;
 	ros::Time last_time_whycon_, last_time_apriltag_, last_time_aruco_;
+	ros::Publisher pub_desPose_;
 
 	geometry_msgs::PoseStamped apriltag_Pose_, whycon_Pose_, aruco_Pose_, cur_pose_;
 	double marker_size_;
