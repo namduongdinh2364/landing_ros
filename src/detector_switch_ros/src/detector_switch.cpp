@@ -269,7 +269,6 @@ void DetectorSwitch::pubPoseCallback(const ros::TimerEvent& event)
 		} 
 		else if (detected_whycon)
 		{	
-
 			std::cout << "Whycon is used "  << std::endl;
 			range_err = sqrt(pow(whycon_Pose_.pose.position.x,2) + pow(whycon_Pose_.pose.position.y,2));
 			if (range_err < 0.2)

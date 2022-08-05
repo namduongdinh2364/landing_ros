@@ -310,8 +310,8 @@ void geometricCtrl::cmdloopCallback(const ros::TimerEvent &event) {
 
         pid_velocity(0) = pid_x.getOutput(PRECISION(mavPos_(0)), pointUpdate(0));
         pid_velocity(1) = pid_y.getOutput(PRECISION(mavPos_(1)), pointUpdate(1));
-        std::cout << pid_velocity(0) << std::endl;
-        std::cout << pid_velocity(1) << std::endl;
+        // std::cout << pid_velocity(0) << std::endl;
+        // std::cout << pid_velocity(1) << std::endl;
         desired_pose(0) = mavPos_(0)+ pid_velocity(0) * 0.01;
         desired_pose(1) = mavPos_(1)+ pid_velocity(1) * 0.01;
 

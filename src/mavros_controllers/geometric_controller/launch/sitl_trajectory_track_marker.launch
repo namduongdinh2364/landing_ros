@@ -21,7 +21,7 @@
           <param name="max_acc" value="10.0" />
           <!--Params specific for Iris copter-->
           <param name="attctrl_constant" value="0.15"/>
-          <param name="normalizedthrust_constant" value="0.075"/>
+          <param name="normalizedthrust_constant" value="0.062"/>
           <param name="normalizedthrust_offset" value="0.1"/>
           <param name="Kp_x" value="3.0" />
           <param name="Kp_y" value="3.0" />
@@ -30,7 +30,7 @@
           <param name="Kv_y" value="2.0"/>
           <param name="Kv_z" value="1.5"/>
           <param name="yaw_heading" value="0.0"/>
-          <param name="init_pos_z" value="9.0"/>
+          <param name="init_pos_z" value="4.0"/>
   </node>
 
   <include file="$(find mavros)/launch/node.launch">
