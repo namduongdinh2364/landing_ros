@@ -65,6 +65,7 @@ void transformAdaption::loopCallback(const ros::TimerEvent& event) {
 		desPose_.pose.position.y = PRECISION(markerPose_(1));
 		desPose_.pose.position.z = 0.0;
 		pub_desPose_.publish(desPose_);
+		// std::cout << desPose_ << std::endl;
 
 		// if (abs(YAW_ANGLE(m_yaw_)) >= ERROR_ACCEPTANCE_YAW_DEGREES) {
 		// 	std_msgs::Float32 msg_yaw;
@@ -84,7 +85,7 @@ void transformAdaption::checkloopCallback(const ros::TimerEvent& event) {
 	// 	ROS_WARN_STREAM("Enable Landing: UAV is approaded the maximum altitude");
 	// }
 	// check_landing_constraints_loop();
-	check_detect_timeout_loop();
+	// check_detect_timeout_loop();
 }
 
 void transformAdaption::mavrosPose_Callback(const geometry_msgs::PoseStamped& msg)

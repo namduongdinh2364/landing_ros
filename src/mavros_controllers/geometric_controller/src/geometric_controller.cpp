@@ -52,7 +52,9 @@ geometricCtrl::geometricCtrl(const ros::NodeHandle &nh, const ros::NodeHandle &n
       landing_commanded_(false),
       feedthrough_enable_(false),
       landing_detec_(false),
-      node_state(WAITING_FOR_HOME_POSE) {
+      node_state(WAITING_FOR_HOME_POSE),
+      decrease_height_(false),
+      accept_update(true) {
   referenceSub_ =
       nh_.subscribe("reference/setpoint", 1, &geometricCtrl::targetCallback, this, ros::TransportHints().tcpNoDelay());
   flatreferenceSub_ = nh_.subscribe("reference/flatsetpoint", 1, &geometricCtrl::flattargetCallback, this,
@@ -75,6 +77,7 @@ geometricCtrl::geometricCtrl(const ros::NodeHandle &nh, const ros::NodeHandle &n
                                    this);  // Define timer for constant loop rate
   statusloop_timer_ = nh_.createTimer(ros::Duration(1), &geometricCtrl::statusloopCallback,
                                       this);  // Define timer for constant loop rate
+  decrese_height_ = nh_.subscribe("/decrease_height", 1,  &geometricCtrl::decreaseheightCallback, this,ros::TransportHints().tcpNoDelay());
 
   angularVelPub_ = nh_.advertise<mavros_msgs::AttitudeTarget>("command/bodyrate_command", 1);
   referencePosePub_ = nh_.advertise<geometry_msgs::PoseStamped>("reference/pose", 1);
@@ -120,16 +123,22 @@ geometricCtrl::geometricCtrl(const ros::NodeHandle &nh, const ros::NodeHandle &n
 
   tau << tau_x, tau_y, tau_z;
 
-    pid_x.setOutputLimits(0.3);
-    pid_y.setOutputLimits(0.3);
-    pid_z.setOutputLimits(0.3);
-    pid_x.setOutputRampRate(0.1);
-    pid_y.setOutputRampRate(0.1);
-    pid_z.setOutputRampRate(0.1);
+  pid_x.setOutputLimits(0.1);
+  pid_y.setOutputLimits(0.1);
+  pid_z.setOutputLimits(0.1);
+  pid_x.setOutputRampRate(0.1);
+  pid_y.setOutputRampRate(0.1);
+  pid_z.setOutputRampRate(0.1);
 
 }
 geometricCtrl::~geometricCtrl() {
   // Destructor
+}
+
+
+void geometricCtrl::decreaseheightCallback(const std_msgs::Bool &msg){
+  decrease_height_ = msg.data;
+  // std::cout << "update status height: " << decrease_height_ << std::endl;
 }
 
 void geometricCtrl::targetCallback(const geometry_msgs::TwistStamped &msg) {
@@ -261,38 +270,91 @@ void geometricCtrl::cmdloopCallback(const ros::TimerEvent &event) {
     }
 
     case LANDING: {
+
+        if (fabs(mavPos_(0) - pointUpdate(0)) < 1.0) {
+          
+          pid_x.setOutputLimits(0.10);
+        }
+        else {
+          pid_x.setOutputLimits(0.25);
+        }
+        if (fabs(mavPos_(1) - pointUpdate(1)) < 1.0) {
+          
+          pid_y.setOutputLimits(0.10);
+        }
+        else {
+          pid_y.setOutputLimits(0.25);
+        }
+        if (fabs(mavPos_(2) - pointUpdate(2)) < 4.0) {
+          pid_z.setOutputLimits(0.2);
+        }
+        else {
+          pid_z.setOutputLimits(0.3);
+        }
         Eigen::Vector3d desired_acc;
         Eigen::Vector3d desired_pose;
-        Eigen::Vector3d error_horizontal;
+        // Eigen::Vector3d error_horizontal;
+        // std::cout << "State Land" << std::endl;
+        if (!decrease_height_) {
+          accept_update = true;
+          // std::cout << "range fail" << std::endl;
+        }
 
-        error_horizontal << mavPos_(0) - point_des(0), mavPos_(1) - point_des(1), 0;
-        pid_velocity(0) = pid_x.getOutput(PRECISION(mavPos_(0)), point_des(0));
-        pid_velocity(1) = pid_y.getOutput(PRECISION(mavPos_(1)), point_des(1));
+        if (accept_update) 
+        {
+          pointUpdate = point_des;
+          accept_update = false;
+          // std::cout << "Update point" << std::endl;
+          // std::cout << pointUpdate << std::endl;
+        }
+
+        pid_velocity(0) = pid_x.getOutput(PRECISION(mavPos_(0)), pointUpdate(0));
+        pid_velocity(1) = pid_y.getOutput(PRECISION(mavPos_(1)), pointUpdate(1));
+        std::cout << pid_velocity(0) << std::endl;
+        std::cout << pid_velocity(1) << std::endl;
         desired_pose(0) = mavPos_(0)+ pid_velocity(0) * 0.01;
         desired_pose(1) = mavPos_(1)+ pid_velocity(1) * 0.01;
-        if (error_horizontal.norm() < 0.3)
+
+        if (decrease_height_)
         {
-            pid_velocity(2) = pid_z.getOutput(mavPos_(2), point_des(2));
-            desired_pose(2) = mavPos_(2) + pid_velocity(2) * 0.01;
-            if (mavPos_(2) < 3.0) {
-                desired_pose(1) = point_des(1);
-                desired_pose(0) = point_des(0);
-                Kpos_x_ = 0.5;
-                Kpos_y_ = 0.5;
-                Kpos_z_ = 0.5;
-            }
+          // std::cout << "Decrease height" << std::endl;
+          pid_velocity(2) = pid_z.getOutput(mavPos_(2), pointUpdate(2));
+          desired_pose(2) = mavPos_(2) + pid_velocity(2) * 0.01;
         }
         else
         {
-            pid_velocity(2) = 0;
-            desired_pose(2) = mavPos_(2) - 0.1;
+          pid_velocity(2) = 0.0;
+          desired_pose(2) = mavPos_(2)-0.1;
+          // std::cout << "height: " << desired_pose(2) << std::endl;
         }
 
-        if (feedthrough_enable_) {
-            desired_acc = targetAcc_;
-        } else {
-            desired_acc = controlPosition(desired_pose, pid_velocity, targetAcc_);
-        }
+        // if (mavPos_(2) < 1.5) 
+        //   {
+        //     desired_pose(1) = pointUpdate(1);
+        //     desired_pose(0) = pointUpdate(0);
+        //   }
+
+        // std::cout << "status decerase: " << decrease_height_ << std::endl;
+        // error_horizontal << mavPos_(0) - point_des(0), mavPos_(1) - point_des(1), 0;
+
+        // if (error_horizontal.norm() < 0.3)
+        // {
+        //     if (mavPos_(2) < 3.0) {
+        //         desired_pose(1) = point_des(1);
+        //         desired_pose(0) = point_des(0);
+        //     }
+        // }
+        // else
+        // {
+        //     pid_velocity(2) = 0;
+        //     desired_pose(2) = mavPos_(2) - 0.1;
+        // }
+
+        // if (feedthrough_enable_) {
+        //     desired_acc = targetAcc_;
+        // } else {
+        desired_acc = controlPosition(desired_pose, pid_velocity, targetAcc_);
+        // }
 
         computeBodyRateCmd(cmdBodyRate_, desired_acc);
         pubRateCommands(cmdBodyRate_, q_des);
@@ -606,6 +668,12 @@ void geometricCtrl::dynamicReconfigureCallback(geometric_controller::GeometricCo
   } else if (Kvel_z_ != config.Kv_z) {
     Kvel_z_ = config.Kv_z;
     ROS_INFO("Reconfigure request : Kv_z  = %.2f  ", config.Kv_z);
+  }else if (norm_thrust_const_ != config.norm_thrust_const) {
+    norm_thrust_const_ = config.norm_thrust_const;
+    ROS_INFO("Reconfigure request : Kv_z  = %.2f  ", config.norm_thrust_const);
+  } else if (norm_thrust_offset_ != config.norm_thrust_offset) {
+    norm_thrust_offset_ = config.norm_thrust_offset;
+    ROS_INFO("Reconfigure request : Kv_z  = %.2f  ", config.norm_thrust_offset);
   }
 
   Kpos_ << -Kpos_x_, -Kpos_y_, -Kpos_z_;

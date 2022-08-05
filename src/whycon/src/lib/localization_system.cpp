@@ -19,9 +19,7 @@ whycon::LocalizationSystem::LocalizationSystem(int _targets, int _width, int _he
 {
   _K.copyTo(K);
   _dist_coeff.copyTo(dist_coeff);
-//   std::cout << dist_coeff << std::endl;
-//   std::cout << K << std::endl;
-
+  
   fc[0] = K.at<double>(0,0);
   fc[1] = K.at<double>(1,1);
   cc[0] = K.at<double>(0,2);

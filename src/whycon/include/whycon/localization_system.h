@@ -7,7 +7,7 @@
 namespace whycon {
   class LocalizationSystem {
     public:
-      LocalizationSystem(int targets, int width, int height, const cv::Mat& K, const cv::Mat& dist_coeff,
+            LocalizationSystem(int targets, int width, int height, const cv::Mat& K, const cv::Mat& dist_coeff,
                          const whycon::DetectorParameters& parameters = DetectorParameters());
       
       bool localize(const cv::Mat& image, bool reset = false, int attempts = 1, int max_refine = 1);

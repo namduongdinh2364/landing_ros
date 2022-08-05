@@ -16,7 +16,7 @@ whycon::RobotPosePublisher::RobotPosePublisher(ros::NodeHandle& n)
 /* this assumes an L-shaped pattern, defining the two axis of the robot on the plane (forward and left are positive) */
 void whycon::RobotPosePublisher::on_poses(const geometry_msgs::PoseArrayConstPtr& pose_array)
 {
-  ROS_INFO_STREAM("receiving poses");
+  // ROS_INFO_STREAM("receiving poses");
   tf::Transform T;
 
   if (pose_array->poses.size() != 3) { ROS_WARN_STREAM("More/less than three circles detected, will not compute pose"); return; }

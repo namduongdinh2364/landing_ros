@@ -4,8 +4,8 @@
     <param name="targets" value="3"/>
     <param name="max_refine" value="5"/>
     <param name="max_attempts" value="5"/>
-    <param name="outer_diameter" value="0.055"/>
-    <param name="inner_diameter" value="0.022"/>
+    <param name="outer_diameter" value="0.118"/>
+    <param name="inner_diameter" value="0.048"/>
     <param name="yscale" value="1.90"/>
     <param name="xscale" value="1.50"/>
   </node>

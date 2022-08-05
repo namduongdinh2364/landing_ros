@@ -8,7 +8,7 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_RELEASE} -Wall -g -O4 -march=native -Wfat
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake-configs")
 
 # set some options
-# option(DISABLE_ROS "Do not build for ROS, but as standalone code" OFF)
+option(DISABLE_ROS "Do not build for ROS, but as standalone code" OFF)
 option(ENABLE_FULL_UNDISTORT "Undistort the whole frame" OFF)
 option(ENABLE_RANDOMIZED_THRESHOLD "Use rand() instead of binary-like search for threshold" OFF)
 option(ENABLE_VERBOSE "Enable verbose console messages during detection" OFF)
@@ -67,6 +67,10 @@ add_library(whycon SHARED src/lib/circle_detector.cpp src/lib/many_circle_detect
 target_link_libraries(whycon ${OpenCV_LIBS} ${Boost_LIBRARIES})
 
 if(NOT DISABLE_ROS)
+
+    add_executable(whycon_uav src/ros/whycon_uav_node.cpp src/ros/whycon_uav_ros.cpp)
+    set_target_properties(whycon_uav PROPERTIES OUTPUT_NAME whycon_uav)
+
   add_executable(whycon-node src/ros/whycon_node.cpp src/ros/whycon_ros.cpp)
   set_target_properties(whycon-node PROPERTIES OUTPUT_NAME whycon)
 
@@ -77,6 +81,7 @@ if(NOT DISABLE_ROS)
   add_executable(robot_pose_publisher src/ros/robot_pose_publisher.cpp src/ros/robot_pose_publisher_node.cpp)  
   add_executable(transformer src/ros/transformer.cpp src/ros/transformer_node.cpp)
 
+  add_dependencies(whycon_uav whycon_generate_messages_cpp)
   add_dependencies(whycon-node whycon_generate_messages_cpp)
   add_dependencies(whycon_nodelet whycon_generate_messages_cpp)
   add_dependencies(set_axis whycon_generate_messages_cpp)
@@ -84,6 +89,7 @@ if(NOT DISABLE_ROS)
   add_dependencies(robot_pose_publisher whycon_generate_messages_cpp)
   add_dependencies(transformer whycon_generate_messages_cpp)
 
+  target_link_libraries(whycon_uav ${catkin_LIBRARIES} ${YAML_CPP_LIBRARIES} whycon)
   target_link_libraries(whycon-node ${catkin_LIBRARIES} ${YAML_CPP_LIBRARIES} whycon)
   target_link_libraries(whycon_nodelet ${catkin_LIBRARIES} ${YAML_CPP_LIBRARIES} whycon)
   target_link_libraries(set_axis ${catkin_LIBRARIES} ${YAML_CPP_LIBRARIES} whycon)

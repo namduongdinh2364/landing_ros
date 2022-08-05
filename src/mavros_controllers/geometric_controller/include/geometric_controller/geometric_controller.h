@@ -61,6 +61,7 @@
 #include <nav_msgs/Odometry.h>
 #include <nav_msgs/Path.h>
 #include <std_msgs/Float32.h>
+#include <std_msgs/Bool.h>
 #include <Eigen/Dense>
 
 #include <controller_msgs/FlatTarget.h>
@@ -96,6 +97,9 @@ class geometricCtrl {
   ros::NodeHandle nh_;
   ros::NodeHandle nh_private_;
   ros::Subscriber referenceSub_;
+
+  ros::Subscriber decrese_height_;
+
   ros::Subscriber flatreferenceSub_;
   ros::Subscriber multiDOFJointSub_;
   ros::Subscriber mavstateSub_;
@@ -126,7 +130,7 @@ class geometricCtrl {
   double norm_thrust_const_, norm_thrust_offset_;
   double max_fb_acc_;
   double dx_, dy_, dz_;
-  bool landing_detec_;
+  bool landing_detec_, decrease_height_;
 
   mavros_msgs::State current_state_;
   mavros_msgs::SetMode offb_set_mode_, land_set_mode_;
@@ -167,6 +171,9 @@ class geometricCtrl {
   void mavtwistCallback(const geometry_msgs::TwistStamped &msg);
   void statusloopCallback(const ros::TimerEvent &event);
   void markerposeCallback(const geometry_msgs::PoseStamped &msg);
+
+  void decreaseheightCallback(const std_msgs::Bool &msg);
+
   bool ctrltriggerCallback(std_srvs::SetBool::Request &req, std_srvs::SetBool::Response &res);
   bool landCallback(std_srvs::SetBool::Request &request, std_srvs::SetBool::Response &response);
   geometry_msgs::PoseStamped vector3d2PoseStampedMsg(Eigen::Vector3d &position, Eigen::Vector4d &orientation);
@@ -192,11 +199,11 @@ class geometricCtrl {
     }
   };
   geometry_msgs::Pose home_pose_;
-  bool received_home_pose;
-  MiniPID pid_x = MiniPID(0.15, 0.01, 0.0, 0.05);
-  MiniPID pid_y = MiniPID(0.15, 0.01, 0.0, 0.05);
-  MiniPID pid_z = MiniPID(0.2, 0.01, 0.0, 0.05);
-  Eigen::Vector3d pid_velocity;
+  bool received_home_pose, accept_update;
+  MiniPID pid_x = MiniPID(0.4, 2.4, 0.0, 0.05);
+  MiniPID pid_y = MiniPID(0.4, 2.4, 0.0, 0.05);
+  MiniPID pid_z = MiniPID(0.4, 2.4, 0.0, 0.05);
+  Eigen::Vector3d pid_velocity, pointUpdate;
 
  public:
   void dynamicReconfigureCallback(geometric_controller::GeometricControllerConfig &config, uint32_t level);
