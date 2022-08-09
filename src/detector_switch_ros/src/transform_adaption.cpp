@@ -59,8 +59,11 @@ void transformAdaption::loopCallback(const ros::TimerEvent& event) {
 	 * If one marker is detected, marker pose will be published.
 	 */
 	if (locked_trans_)
-	{
+	{	
+
 		locked_trans_ = false;
+		desPose_.header.stamp = ros::Time::now();
+		desPose_.header.frame_id = "desired_pose";
 		desPose_.pose.position.x = PRECISION(markerPose_(0));
 		desPose_.pose.position.y = PRECISION(markerPose_(1));
 		desPose_.pose.position.z = 0.0;
