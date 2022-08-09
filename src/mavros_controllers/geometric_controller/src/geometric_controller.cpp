@@ -40,7 +40,8 @@
 
 #include "geometric_controller/geometric_controller.h"
 #define PRECISION(x)    round(x * 100) / 100
-
+#define PRECISION1(y)    round(y * 10) / 10
+// #define PRECISIONPOINT(point) round(point*10)
 using namespace Eigen;
 using namespace std;
 // Constructor
@@ -123,12 +124,12 @@ geometricCtrl::geometricCtrl(const ros::NodeHandle &nh, const ros::NodeHandle &n
 
   tau << tau_x, tau_y, tau_z;
 
-  pid_x.setOutputLimits(0.1);
-  pid_y.setOutputLimits(0.1);
-  pid_z.setOutputLimits(0.1);
-  pid_x.setOutputRampRate(0.1);
-  pid_y.setOutputRampRate(0.1);
-  pid_z.setOutputRampRate(0.1);
+  // pid_x.setOutputLimits(0.3);
+  // pid_y.setOutputLimits(0.3);
+  // pid_z.setOutputLimits(0.3);
+  // pid_x.setOutputRampRate(0.2);
+  // pid_y.setOutputRampRate(0.2);
+  // pid_z.setOutputRampRate(0.2);
 
 }
 geometricCtrl::~geometricCtrl() {
@@ -240,9 +241,9 @@ void geometricCtrl::mavtwistCallback(const geometry_msgs::TwistStamped &msg) {
 }
 
 bool geometricCtrl::landCallback(std_srvs::SetBool::Request &request, std_srvs::SetBool::Response &response) {
-  node_state = LANDING;
-  landing_detec_ = true;
-  ROS_WARN_STREAM("Start landing to the marker");
+  // node_state = LANDED;
+  // landing_detec_ = true;
+  // ROS_WARN_STREAM("Start landing to the marker");
   return true;
 }
 
@@ -270,63 +271,71 @@ void geometricCtrl::cmdloopCallback(const ros::TimerEvent &event) {
     }
 
     case LANDING: {
+      Eigen::Vector3d desired_acc;
 
-        if (fabs(mavPos_(0) - pointUpdate(0)) < 1.0) {
+        // if (fabs(mavPos_(0) - pointUpdate(0)) < 1.0) {
           
-          pid_x.setOutputLimits(0.10);
-        }
-        else {
-          pid_x.setOutputLimits(0.25);
-        }
-        if (fabs(mavPos_(1) - pointUpdate(1)) < 1.0) {
+        //   pid_x.setOutputLimits(0.10);
+        // }
+        // else {
+        //   pid_x.setOutputLimits(0.20);
+        // }
+        // if (fabs(mavPos_(1) - pointUpdate(1)) < 1.0) {
           
-          pid_y.setOutputLimits(0.10);
-        }
-        else {
-          pid_y.setOutputLimits(0.25);
-        }
-        if (fabs(mavPos_(2) - pointUpdate(2)) < 4.0) {
-          pid_z.setOutputLimits(0.2);
-        }
-        else {
-          pid_z.setOutputLimits(0.3);
-        }
-        Eigen::Vector3d desired_acc;
-        Eigen::Vector3d desired_pose;
-        // Eigen::Vector3d error_horizontal;
-        // std::cout << "State Land" << std::endl;
-        if (!decrease_height_) {
-          accept_update = true;
-          // std::cout << "range fail" << std::endl;
-        }
+        //   pid_y.setOutputLimits(0.10);
+        // }
+        // else {
+        //   pid_y.setOutputLimits(0.3);
+        // }
+        // if (fabs(mavPos_(2) - pointUpdate(2)) < 4.0) {
+        //   pid_z.setOutputLimits(0.2);
+        // }
+        // else {
+        //   pid_z.setOutputLimits(0.3);
+        // }
+        // Eigen::Vector3d desired_acc;
+        // Eigen::Vector3d desired_pose;
+        // // Eigen::Vector3d error_horizontal;
+        // // std::cout << "State Land" << std::endl;
+        // if (!decrease_height_) {
+        //   accept_update = true;
+        //   // std::cout << "range fail" << std::endl;
+        // }
 
-        if (accept_update) 
-        {
-          pointUpdate = point_des;
-          accept_update = false;
+        // if (accept_update) 
+        // {
+        //   pointUpdate = point_des;
+        //   accept_update = false;
           // std::cout << "Update point" << std::endl;
           // std::cout << pointUpdate << std::endl;
-        }
+        // }
+        
+        // while (PRECISION(mavPos_(0))< pointUpdate(0) || PRECISION(mavPos_(1)) < pointUpdate(1) )
+        // {
+        //   desired_pose(0) = mavPos_(0)+ pid_velocity(0) * 0.1;
+        //   desired_pose(1) = mavPos_(1)+ pid_velocity(1) * 0.1;
+        // }
+        
 
-        pid_velocity(0) = pid_x.getOutput(PRECISION(mavPos_(0)), pointUpdate(0));
-        pid_velocity(1) = pid_y.getOutput(PRECISION(mavPos_(1)), pointUpdate(1));
+        // pid_velocity(0) = pid_x.getOutput(PRECISION(mavPos_(0)), pointUpdate(0));
+        // pid_velocity(1) = pid_y.getOutput(PRECISION(mavPos_(1)), pointUpdate(1));
         // std::cout << pid_velocity(0) << std::endl;
         // std::cout << pid_velocity(1) << std::endl;
-        desired_pose(0) = mavPos_(0)+ pid_velocity(0) * 0.01;
-        desired_pose(1) = mavPos_(1)+ pid_velocity(1) * 0.01;
+        // desired_pose(0) = mavPos_(0)+ pid_velocity(0);
+        // desired_pose(1) = mavPos_(1)+ pid_velocity(1);
 
-        if (decrease_height_)
-        {
-          // std::cout << "Decrease height" << std::endl;
-          pid_velocity(2) = pid_z.getOutput(mavPos_(2), pointUpdate(2));
-          desired_pose(2) = mavPos_(2) + pid_velocity(2) * 0.01;
-        }
-        else
-        {
-          pid_velocity(2) = 0.0;
-          desired_pose(2) = mavPos_(2)-0.1;
+        // if (decrease_height_)
+        // {
+        //   // std::cout << "Decrease height" << std::endl;
+        //   pid_velocity(2) = pid_z.getOutput(mavPos_(2), pointUpdate(2));
+        //   desired_pose(2) = mavPos_(2) + pid_velocity(2);
+        // }
+        // else
+        // {
+        //   pid_velocity(2) = 0.0;
+        //   desired_pose(2) = mavPos_(2) - 0.3;
           // std::cout << "height: " << desired_pose(2) << std::endl;
-        }
+        // }
 
         // if (mavPos_(2) < 1.5) 
         //   {
@@ -353,19 +362,27 @@ void geometricCtrl::cmdloopCallback(const ros::TimerEvent &event) {
         // if (feedthrough_enable_) {
         //     desired_acc = targetAcc_;
         // } else {
-        desired_acc = controlPosition(desired_pose, pid_velocity, targetAcc_);
+        // std::cout << desired_pose << std::endl;
+        // desired_pose(0) = PRECISION1(desired_pose(0));
+        // desired_pose(1) = PRECISION1(desired_pose(1));
+        // desired_pose(2) = PRECISION1(desired_pose(2));
+        // std::cout << desired_pose << std::endl;
+        // desired_acc = controlPosition(desired_pose, targetVel_, targetAcc_);
         // }
-
+        desired_acc = controlPosition(targetPos_, targetVel_, targetAcc_);
         computeBodyRateCmd(cmdBodyRate_, desired_acc);
         pubRateCommands(cmdBodyRate_, q_des);
         if(mavPos_(2) < 0.3) {
             node_state = LANDED;
         }
+        // if(mavPos_(2) < 0.3) {
+        //     node_state = LANDED;
+        // }
         ros::spinOnce();
         break;
     }
     case LANDED:
-      ROS_INFO("Landed. Please set to position control and disarm.");
+        ROS_INFO("Landed. Please set to position control and disarm.");
         if(current_state_.mode != "AUTO.LAND") {
           land_set_mode_.request.custom_mode = "AUTO.LAND";
           if(set_mode_client_.call(land_set_mode_) && land_set_mode_.response.mode_sent) {

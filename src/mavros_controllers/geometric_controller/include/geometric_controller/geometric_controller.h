@@ -72,7 +72,8 @@
 #include <trajectory_msgs/MultiDOFJointTrajectoryPoint.h>
 
 #include "geometric_controller/common.h"
-#include "geometric_controller/MiniPID.h"
+// #include "geometric_controller/MiniPID.h"
+// #include "geometric_controller/pid_controller_base.h"
 
 #define ERROR_QUATERNION 1
 #define ERROR_GEOMETRIC 2
@@ -200,9 +201,16 @@ class geometricCtrl {
   };
   geometry_msgs::Pose home_pose_;
   bool received_home_pose, accept_update;
-  MiniPID pid_x = MiniPID(0.4, 2.4, 0.0, 0.05);
-  MiniPID pid_y = MiniPID(0.4, 2.4, 0.0, 0.05);
-  MiniPID pid_z = MiniPID(0.4, 2.4, 0.0, 0.05);
+  // MiniPID pid_x = MiniPID(0.2, 2.4, 0.0, 0.05);
+  // MiniPID pid_y = MiniPID(0.2, 2.4, 0.0, 0.05);
+  // MiniPID pid_z = MiniPID(0.4, 2.8, 0.0, 0.05);
+
+  // double kp = 0.4, ki = 0.0, kd = 3.4;
+  // MiniPID pid_cmd = MiniPID(kp, ki, kd);
+  // MiniPID pid_cmd1 = MiniPID(kp, ki, kd);
+  // MiniPID pid_cmd2 = MiniPID(kp, ki, kd);
+  // // pid_cmd(kp, ki, kd);
+  
   Eigen::Vector3d pid_velocity, pointUpdate;
 
  public:

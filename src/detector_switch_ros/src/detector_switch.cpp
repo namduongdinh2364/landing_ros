@@ -236,7 +236,7 @@ void DetectorSwitch::pubPoseCallback(const ros::TimerEvent& event)
 		if (detected_apriltag){
 			std::cout << "Apirltag is used "  << std::endl;
 			range_err = sqrt(pow(apriltag_Pose_.pose.position.x,2) + pow(apriltag_Pose_.pose.position.y,2));
-			if (range_err < 0.2)
+			if (range_err < 0.1)
 			{	
 
 				pub_tf_.publish(apriltag_Pose_);
@@ -254,7 +254,7 @@ void DetectorSwitch::pubPoseCallback(const ros::TimerEvent& event)
 		{	
 			std::cout << "Aruco is used "  << std::endl;
 			range_err = sqrt(pow(aruco_Pose_.pose.position.x,2) + pow(aruco_Pose_.pose.position.y,2));
-			if (range_err < 0.2)
+			if (range_err < 0.1)
 			{
 				pub_tf_.publish(aruco_Pose_);
 				decrease.data = true;
@@ -271,7 +271,7 @@ void DetectorSwitch::pubPoseCallback(const ros::TimerEvent& event)
 		{	
 			std::cout << "Whycon is used "  << std::endl;
 			range_err = sqrt(pow(whycon_Pose_.pose.position.x,2) + pow(whycon_Pose_.pose.position.y,2));
-			if (range_err < 0.2)
+			if (range_err < 0.1)
 			{
 				pub_tf_.publish(whycon_Pose_);
 				decrease.data = true;
