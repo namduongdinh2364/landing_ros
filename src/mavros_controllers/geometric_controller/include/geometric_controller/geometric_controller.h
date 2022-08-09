@@ -131,7 +131,7 @@ class geometricCtrl {
   double norm_thrust_const_, norm_thrust_offset_;
   double max_fb_acc_;
   double dx_, dy_, dz_;
-  bool landing_detec_, decrease_height_;
+  bool start_detec_landing, decrease_height_;
 
   mavros_msgs::State current_state_;
   mavros_msgs::SetMode offb_set_mode_, land_set_mode_;

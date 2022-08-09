@@ -52,7 +52,7 @@ geometricCtrl::geometricCtrl(const ros::NodeHandle &nh, const ros::NodeHandle &n
       ctrl_enable_(true),
       landing_commanded_(false),
       feedthrough_enable_(false),
-      landing_detec_(false),
+      start_detec_landing(false),
       node_state(WAITING_FOR_HOME_POSE),
       decrease_height_(false),
       accept_update(true) {
@@ -242,8 +242,8 @@ void geometricCtrl::mavtwistCallback(const geometry_msgs::TwistStamped &msg) {
 
 bool geometricCtrl::landCallback(std_srvs::SetBool::Request &request, std_srvs::SetBool::Response &response) {
   // node_state = LANDED;
-  // landing_detec_ = true;
-  // ROS_WARN_STREAM("Start landing to the marker");
+  start_detec_landing = true;
+  ROS_WARN_STREAM("Start landing on the marker");
   return true;
 }
 
@@ -268,6 +268,11 @@ void geometricCtrl::cmdloopCallback(const ros::TimerEvent &event) {
       appendPoseHistory();
       pubPoseHistory();
       break;
+    }
+
+    if (start_detec_landing && mavPos_(2) < 0.3)
+    {
+      node_state = LANDED;
     }
 
     case LANDING: {
@@ -397,7 +402,7 @@ void geometricCtrl::cmdloopCallback(const ros::TimerEvent &event) {
 void geometricCtrl::mavstateCallback(const mavros_msgs::State::ConstPtr &msg) { current_state_ = *msg; }
 
 void geometricCtrl::statusloopCallback(const ros::TimerEvent &event) {
-  if (sim_enable_ && !landing_detec_) {
+  if (sim_enable_ && !start_detec_landing) {
     // Enable OFFBoard mode and arm automatically
     // This is only run if the vehicle is simulated
     arm_cmd_.request.value = true;

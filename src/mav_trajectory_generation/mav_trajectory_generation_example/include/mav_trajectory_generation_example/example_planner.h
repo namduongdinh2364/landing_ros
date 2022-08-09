@@ -45,6 +45,7 @@ class ExamplePlanner {
   void cmdloopCallback(const ros::TimerEvent &event);
   void uavposeCallback(const geometry_msgs::PoseStamped &msg);
   void uavtwistCallback(const geometry_msgs::TwistStamped &msg);
+  bool enableLandCallback(std_srvs::SetBool::Request &request, std_srvs::SetBool::Response &response);
 
  private:
   ros::Publisher pub_markers_;
@@ -56,6 +57,7 @@ class ExamplePlanner {
   ros::Subscriber decrese_height_;
   ros::Timer cmdloop_timer_;
   ros::ServiceClient set_mode_client_;
+  ros::ServiceServer land_service_;
 
   ros::NodeHandle& nh_;
   Eigen::Vector3d current_pose_;
@@ -69,6 +71,7 @@ class ExamplePlanner {
   Eigen::Vector3d point_des;
   bool decrease_height_, accept_update, received_marker_pose;
   bool check = false;
+  bool start_landing_;
   Eigen::Vector3d pointUpdate;
   Eigen::Vector3d save_point;
   mav_trajectory_generation::Trajectory trajectory;

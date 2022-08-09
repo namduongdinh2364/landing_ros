@@ -22,7 +22,8 @@
           <!--Params specific for Iris copter-->
           <param name="attctrl_constant" value="0.3"/>
           <!-- <param name="normalizedthrust_constant" value="0.062"/> -->
-          <param name="normalizedthrust_constant" value="0.075"/>
+          <!-- <param name="normalizedthrust_constant" value="0.075"/> -->
+          <param name="normalizedthrust_constant" value="0.059"/>
           <param name="normalizedthrust_offset" value="0.1"/>
           <param name="Kp_x" value="1.5" />
           <param name="Kp_y" value="1.5" />

@@ -5,6 +5,7 @@ ExamplePlanner::ExamplePlanner(ros::NodeHandle& nh) :
     max_v_(0.5),
     max_a_(0.35),
     decrease_height_(false),
+    start_landing_(false),
     node_state(WAITING_FOR_MARKER_POSE),
     current_velocity_(Eigen::Vector3d::Zero()),
     current_pose_(Eigen::Vector3d::Zero()) {
@@ -37,7 +38,7 @@ ExamplePlanner::ExamplePlanner(ros::NodeHandle& nh) :
   decrese_height_ = nh_.subscribe("/decrease_height", 1,  &ExamplePlanner::decreaseheightCallback, this,ros::TransportHints().tcpNoDelay());
 
   cmdloop_timer_ = nh_.createTimer(ros::Duration(0.2), &ExamplePlanner::cmdloopCallback, this);
-  set_mode_client_ = nh_.serviceClient<std_srvs::SetBool>("land");
+  land_service_ = nh_.advertiseService("land4", &ExamplePlanner::enableLandCallback, this);
 }
 
 void ExamplePlanner::markerposeCallback(const geometry_msgs::PoseStamped &msg){
@@ -285,8 +286,15 @@ bool ExamplePlanner::publishTrajectory(const mav_trajectory_generation::Trajecto
   mav_trajectory_generation::trajectoryToPolynomialTrajectoryMsg(trajectory,
                                                                  &msg);
   msg.header.frame_id = "map";
-  pub_trajectory_.publish(msg);
+
+  if (start_landing_) {
+    pub_trajectory_.publish(msg);
+  }
 
   return true;
 }
 
+bool ExamplePlanner::enableLandCallback(std_srvs::SetBool::Request &request, std_srvs::SetBool::Response &response) {
+  start_landing_ = true;
+  return true;
+}
