@@ -121,7 +121,7 @@ void DetectorSwitch::pubPoseCallback(const ros::TimerEvent& event)
 	if (cur_pose_.pose.position.z > (2* max_height)/3)
 	{
 		if (detected_whycon){
-			std::cout << "Whycon is used "  << std::endl;
+			// std::cout << "Whycon is used "  << std::endl;
 			range_err = sqrt(pow(whycon_Pose_.pose.position.x,2) + pow(whycon_Pose_.pose.position.y,2));
 			if (range_err < 0.6)
 			{
@@ -138,7 +138,7 @@ void DetectorSwitch::pubPoseCallback(const ros::TimerEvent& event)
 		} 
 		else if (detected_aruco)
 		{	
-			std::cout << "Aruco is used "  << std::endl;
+			// std::cout << "Aruco is used "  << std::endl;
 			range_err = sqrt(pow(aruco_Pose_.pose.position.x,2) + pow(aruco_Pose_.pose.position.y,2));
 			if (range_err < 0.6)
 			{
@@ -155,7 +155,7 @@ void DetectorSwitch::pubPoseCallback(const ros::TimerEvent& event)
 		} 
 		else if (detected_apriltag)
 		{	
-			std::cout << "Apirltag is used "  << std::endl;
+			// std::cout << "Apirltag is used "  << std::endl;
 			range_err = sqrt(pow(apriltag_Pose_.pose.position.x,2) + pow(apriltag_Pose_.pose.position.y,2));
 			if (range_err < 0.6)
 			{
@@ -177,7 +177,7 @@ void DetectorSwitch::pubPoseCallback(const ros::TimerEvent& event)
 	else if (cur_pose_.pose.position.z > (max_height/3))
 	{
 		if (detected_aruco){
-			std::cout << "Aruco is used "  << std::endl;
+			// std::cout << "Aruco is used "  << std::endl;
 			range_err = sqrt(pow(aruco_Pose_.pose.position.x,2) + pow(aruco_Pose_.pose.position.y,2));
 			if (range_err < 0.35)
 			{

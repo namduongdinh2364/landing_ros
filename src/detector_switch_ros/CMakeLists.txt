@@ -62,3 +62,6 @@ target_link_libraries(aruco_detector_node ${catkin_LIBRARIES})
 
 add_executable(cam_info_node src/cam_info.cpp)
 target_link_libraries(cam_info_node ${catkin_LIBRARIES})
+
+add_executable(parser_data_node src/parser_data.cpp)
+target_link_libraries(parser_data_node ${catkin_LIBRARIES})
