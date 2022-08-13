@@ -80,6 +80,7 @@ geometricCtrl::geometricCtrl(const ros::NodeHandle &nh, const ros::NodeHandle &n
                                       this);  // Define timer for constant loop rate
   decrese_height_ = nh_.subscribe("/decrease_height", 1,  &geometricCtrl::decreaseheightCallback, this,ros::TransportHints().tcpNoDelay());
 
+  targetPoint_ = nh_.advertise<geometry_msgs::PoseStamped>("/targetPoint", 1);
   angularVelPub_ = nh_.advertise<mavros_msgs::AttitudeTarget>("command/bodyrate_command", 1);
   referencePosePub_ = nh_.advertise<geometry_msgs::PoseStamped>("reference/pose", 1);
   target_pose_pub_ = nh_.advertise<geometry_msgs::PoseStamped>("mavros/setpoint_position/local", 10);
@@ -208,6 +209,9 @@ void geometricCtrl::multiDOFJointCallback(const trajectory_msgs::MultiDOFJointTr
   reference_request_dt_ = (reference_request_now_ - reference_request_last_).toSec();
 
   targetPos_ << pt.transforms[0].translation.x, pt.transforms[0].translation.y, pt.transforms[0].translation.z;
+  // geometry_msgs::PoseStamped target_msgs;
+  // target_msgs.header.frame_id = "target_point";
+  // target_msgs.header.stamp
   targetVel_ << pt.velocities[0].linear.x, pt.velocities[0].linear.y, pt.velocities[0].linear.z;
 
   targetAcc_ << pt.accelerations[0].linear.x, pt.accelerations[0].linear.y, pt.accelerations[0].linear.z;
@@ -267,14 +271,13 @@ void geometricCtrl::cmdloopCallback(const ros::TimerEvent &event) {
       pubRateCommands(cmdBodyRate_, q_des);
       appendPoseHistory();
       pubPoseHistory();
+      if (start_detec_landing && mavPos_(2) < 0.3)
+      {
+        std::cout << "land" << std::endl;
+        node_state = LANDED;
+      }
       break;
     }
-
-    if (start_detec_landing && mavPos_(2) < 0.3)
-    {
-      node_state = LANDED;
-    }
-
     case LANDING: {
       Eigen::Vector3d desired_acc;
 

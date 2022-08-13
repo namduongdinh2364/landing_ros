@@ -112,6 +112,9 @@ class geometricCtrl {
   ros::Publisher referencePosePub_;
   ros::Publisher posehistoryPub_;
   ros::Publisher systemstatusPub_;
+
+  ros::Publisher targetPoint_;
+  
   ros::ServiceClient arming_client_;
   ros::ServiceClient set_mode_client_;
   ros::ServiceServer ctrltriggerServ_;

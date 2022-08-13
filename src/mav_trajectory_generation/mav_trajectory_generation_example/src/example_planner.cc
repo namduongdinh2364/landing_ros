@@ -2,8 +2,8 @@
 
 ExamplePlanner::ExamplePlanner(ros::NodeHandle& nh) :
     nh_(nh),
-    max_v_(0.5),
-    max_a_(0.35),
+    max_v_(0.1),
+    max_a_(0.5),
     decrease_height_(false),
     start_landing_(false),
     node_state(WAITING_FOR_MARKER_POSE),
@@ -37,7 +37,7 @@ ExamplePlanner::ExamplePlanner(ros::NodeHandle& nh) :
   markerposeSub_ = nh_.subscribe("/cmd/set_desposition/local", 1, &ExamplePlanner::markerposeCallback, this, ros::TransportHints().tcpNoDelay());
   decrese_height_ = nh_.subscribe("/decrease_height", 1,  &ExamplePlanner::decreaseheightCallback, this,ros::TransportHints().tcpNoDelay());
 
-  cmdloop_timer_ = nh_.createTimer(ros::Duration(0.2), &ExamplePlanner::cmdloopCallback, this);
+  cmdloop_timer_ = nh_.createTimer(ros::Duration(0.1), &ExamplePlanner::cmdloopCallback, this);
   land_service_ = nh_.advertiseService("land4", &ExamplePlanner::enableLandCallback, this);
 }
 
@@ -52,11 +52,11 @@ void ExamplePlanner::decreaseheightCallback(const std_msgs::Bool &msg){
   if (decrease_height_)
   {
     mission = DECREASE;
-    // std::cout << "DECREASE" << std::endl;
+   
   }
   else{
     mission = MOVE;
-    // std::cout << "MOVE" << std::endl;
+   
     
   }
   
@@ -104,21 +104,37 @@ void ExamplePlanner::cmdloopCallback(const ros::TimerEvent &event){
           pointUpdate(0) = point_des(0);
           pointUpdate(1) = point_des(1);
           pointUpdate(2) = 0.0;
-          if (save_state!=DECREASE){
+          if ((save_state!=DECREASE)|| (current_pose_(2)<= 2.0 && distance_1<=0.2)){
               accept_update = true;
-              
           }
           if (accept_update)
-          {
+          { 
+            // setMaxSpeed(0.5);
+            // setMaxAcc(0.1);
+            save_point1(0) = pointUpdate(0);
+            save_point1(1) = pointUpdate(1);
+            save_point1(2) = pointUpdate(2);
+            distance_1 = save_point1.norm() - pointUpdate.norm();
+            if (current_pose_(2) <= 15.0){
+              setMaxSpeed(0.3);
+              setMaxAcc(0.2);
+            }
+            else
+            {
+              setMaxSpeed(0.6);
+              setMaxAcc(0.6);
+            }
             planTrajectory(pointUpdate, velocity, &trajectory);
             publishTrajectory(trajectory);
             accept_update = false;
+            std::cout << "DECREASE" << std::endl;
+
           }
           save_state = mission;
-          if(current_pose_(2) < 0.1) {
-            node_state = LANDED;
-            std::cout << "check0" << std::endl;
-          }
+          // if(current_pose_(2) < 0.1) {
+          //   node_state = LANDED;
+          //   std::cout << "check0" << std::endl;
+          // }
           break;
         }
       case MOVE:
@@ -132,42 +148,76 @@ void ExamplePlanner::cmdloopCallback(const ros::TimerEvent &event){
             save_point(1) = pointUpdate(1);
             save_point(2) = pointUpdate(2);
             distance_ = save_point.norm() - current_pose_.norm();
+            if (distance_ > 2.0)
+            {
+              // setMaxSpeed(0.5);
+              // setMaxAcc(0.4);
+              setMaxSpeed(0.8);
+              setMaxAcc(0.6);
+            }
+            else{
+              setMaxSpeed(0.3);
+              setMaxAcc(0.3);
+            }
+
             planTrajectory(pointUpdate, velocity, &trajectory);
             publishTrajectory(trajectory);
             accept_update = false;
+            // std::cout << "distance" << distance_<< std::endl;
+            
+            // land = true;
           }
           else{
-            if ((!decrease_height_ && (save_point.norm() - current_pose_.norm() <= (distance_/4)))|| (save_state!=MOVE)){
+            if ((!decrease_height_ && ((save_point.norm() - current_pose_.norm()) <= distance_/4))|| (save_state!=MOVE))
+            {
               accept_update = true;
-              // std::cout << "current" << current_pose_.norm() << std::endl;
-              // std::cout << "save" << save_point.norm()<< std::endl;
-              // std::cout << "update" << save_point.norm()<< std::endl;
 
+              
+              // std::cout << "update" << save_point.norm()<< std::endl;
             }
+            // std::cout << "current" << current_pose_.norm() << std::endl;
+            // std::cout << "save1" << save_point.norm()<< std::endl;
+            // std::cout << "distance" << distance_ << std::endl;
           }
+          // if (distance_ < 0.1 && land)
+          //   {
+          //     // accept_update = false;
+          //     // save_point(0) = pointUpdate(0);
+          //     // save_point(1) = pointUpdate(1);
+          //     // save_point(2) = pointUpdate(2);
+          //     // distance_ = save_point.norm() - current_pose_.norm();
+          //     std::cout << "update" << std::endl;
+              
+          //     // setMax
+          //     // planTrajectory(save_point, velocity, &trajectory);
+          //     publishTrajectory(trajectory);
+          //     land = false;
+          //   }
           save_state = mission;
-          if(current_pose_(2) < 0.1) {
-            node_state = LANDED;
-            std::cout << "check1" << std::endl;
-          }
+          // if(current_pose_(2) < 0.1) {
+          //   node_state = LANDED;
+          //   std::cout << "check1" << std::endl;
+          // }
           // std::cout << save_state << std::endl;
+          // std::cout << "MOVE" << std::endl;
           break;
         }
       }
     }
-    case LANDED:{
-      // std_srvs::SetBool land_cmd;
-	    // land_cmd.request.data = true;
-	    // set_mode_client_.call(land_cmd);
-      // std::cout << "land" << std::endl;
-      // offb_set_mode_.request.custom_mode = "AUTO.LAND";
-      // if( set_mode_client_.call(offb_set_mode_) && offb_set_mode_.response.mode_sent)
-      // {
-      //     ROS_INFO("[ INFO] --------------- LAND ---------------\n");
-      // }
-      // node_state = LANDED;
-      // ros::spinOnce();
-    }
+    // case LANDED:{
+    //   // std_srvs::SetBool land_cmd;
+	  //   // land_cmd.request.data = true;
+	  //   // set_mode_client_.call(land_cmd);
+    //   std::cout << "land" << std::endl;
+    //   // offb_set_mode_.request.custom_mode = "AUTO.LAND";
+    //   // if( set_mode_client_.call(offb_set_mode_) && offb_set_mode_.response.mode_sent)
+    //   // {
+    //   //     ROS_INFO("[ INFO] --------------- LAND ---------------\n");
+    //   // }
+    //   // node_state = LANDED;
+    //   // ros::spinOnce();
+    //   break;
+    // }
   }
 };
 
@@ -193,6 +243,10 @@ void ExamplePlanner::uavtwistCallback(const geometry_msgs::TwistStamped &msg) {
 // Method to set maximum speed.
 void ExamplePlanner::setMaxSpeed(const double max_v) {
   max_v_ = max_v;
+}
+
+void ExamplePlanner::setMaxAcc(const double max_a) {
+  max_a_ = max_a;
 }
 
 // Plans a trajectory from the current position to the a goal position and velocity

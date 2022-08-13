@@ -1,6 +1,7 @@
 #include "transform_adaption.h"
 
-#define PRECISION(x)    round(x * 100) / 100
+// #define PRECISION(x)    round(x * 100) / 100
+// #define PRECISION(x)  x  
 
 transformAdaption::transformAdaption(const ros::NodeHandle& nh, const ros::NodeHandle& nh_private)
 	: nh_(nh), nh_private_(nh_private), cur_yaw_(0), locked_trans_(false), start_landing_(false),
@@ -8,7 +9,7 @@ transformAdaption::transformAdaption(const ros::NodeHandle& nh, const ros::NodeH
 {
 	/*Public*/
 	pub_desPose_ = nh_.advertise<geometry_msgs::PoseStamped>
-		("cmd/set_desposition/local", 1);
+		("cmd/set_desposition/local", 10);
 	pub_desYaw_ = nh_.advertise<std_msgs::Float32>
 		("cmd/reference/yaw", 1);
 
@@ -64,8 +65,10 @@ void transformAdaption::loopCallback(const ros::TimerEvent& event) {
 		locked_trans_ = false;
 		desPose_.header.stamp = ros::Time::now();
 		desPose_.header.frame_id = "desired_pose";
-		desPose_.pose.position.x = PRECISION(markerPose_(0));
-		desPose_.pose.position.y = PRECISION(markerPose_(1));
+		// desPose_.pose.position.x = PRECISION(markerPose_(0));
+		// desPose_.pose.position.y = PRECISION(markerPose_(1));
+		desPose_.pose.position.x = markerPose_(0);
+		desPose_.pose.position.y = markerPose_(1);
 		desPose_.pose.position.z = 0.0;
 		pub_desPose_.publish(desPose_);
 		// std::cout << desPose_ << std::endl;

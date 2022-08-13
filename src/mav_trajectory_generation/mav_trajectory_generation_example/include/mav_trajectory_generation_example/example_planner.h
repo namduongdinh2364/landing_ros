@@ -25,6 +25,7 @@ class ExamplePlanner {
   void uavOdomCallback(const nav_msgs::Odometry::ConstPtr& pose);
 
   void setMaxSpeed(double max_v);
+  void setMaxAcc(double max_a);
 
   // Plans a trajectory to take off from the current position and
   // fly to the given altitude (while maintaining x,y, and yaw).
@@ -67,13 +68,13 @@ class ExamplePlanner {
   double max_a_; // m/s^2
   double max_ang_v_;
   double max_ang_a_;
-  double distance_;
+  double distance_, distance_1;
   Eigen::Vector3d point_des;
   bool decrease_height_, accept_update, received_marker_pose;
   bool check = false;
-  bool start_landing_;
+  bool start_landing_, land;
   Eigen::Vector3d pointUpdate;
-  Eigen::Vector3d save_point;
+  Eigen::Vector3d save_point, save_point1;
   mav_trajectory_generation::Trajectory trajectory;
   Eigen::Vector3d position, velocity;
   enum FlightState { WAITING_FOR_MARKER_POSE, MISSION_EXECUTION, LANDED} node_state;
@@ -89,6 +90,7 @@ class ExamplePlanner {
   };
   mavros_msgs::State current_state_;
   mavros_msgs::SetMode offb_set_mode_, land_set_mode_;
+
 
 };
 

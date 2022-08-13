@@ -11,6 +11,9 @@ DetectorSwitch::DetectorSwitch(const ros::NodeHandle& nh, const ros::NodeHandle&
 		("/tf_marker", 1);
 	pub_desPose_ = nh_.advertise<geometry_msgs::PoseStamped>
 		("cmd/set_desposition/local", 1);
+	pub_whycon_ = nh_.advertise<std_msgs::Bool>("detect_whycon",1);
+	pub_aruco_ = nh_.advertise<std_msgs::Bool>("detect_aruco",1);
+	pub_apirltag_ = nh_.advertise<std_msgs::Bool>("detect_apirltag",1);
 
 	sub_mavros_local_position_ = nh_private_.subscribe
 		("/mavros/local_position/pose", 1, &DetectorSwitch::mavrosPose_Callback, this, ros::TransportHints().tcpNoDelay());
@@ -114,6 +117,10 @@ void DetectorSwitch::pubPoseCallback(const ros::TimerEvent& event)
 	if (lock_height && land){
 		lock_height = false;
 		max_height = cur_pose_.pose.position.z;
+		
+		range1 = max_height* tan(ANGLE_1*PI/180);
+		range2 = max_height* tan(ANGLE_1*PI/180) *2 / 3;
+		range3 = max_height* tan(ANGLE_1*PI/180) *1 / 3;
 		// std::cout << max_height << std::endl;
 		// std::cout << "false" << std::endl;
 	}
@@ -121,9 +128,19 @@ void DetectorSwitch::pubPoseCallback(const ros::TimerEvent& event)
 	if (cur_pose_.pose.position.z > (2* max_height)/3)
 	{
 		if (detected_whycon){
-			std::cout << "Whycon is used "  << std::endl;
+			detect_marker.stamp = ros::Time::now();
+			detect_marker.frame_id = "Whycon";
+			pub_whycon_.publish(detect_marker);
+			// detect_marker.data = true;
+			// detect_marker.header
 			range_err = sqrt(pow(whycon_Pose_.pose.position.x,2) + pow(whycon_Pose_.pose.position.y,2));
-			if (range_err < 0.6)
+			// range_err_x = fabs(atan2(whycon_Pose_.pose.position.x,whycon_Pose_.pose.position.z)) * 180  /  PI;
+			// range_err_y = fabs(atan2(whycon_Pose_.pose.position.y,whycon_Pose_.pose.position.z)) * 180  /  PI;
+			// std::cout << "Whycon is used "  << std::endl;
+			// std::cout << "x: " << range_err_x << std::endl;
+			// std::cout << "y: " << range_err_y << std::endl;
+			// if (range_err_x < ANGLE_1 && range_err_y < ANGLE_1)
+			if (range1 > range_err)
 			{
 				pub_tf_.publish(whycon_Pose_);
 				decrease.data = true;
@@ -138,9 +155,15 @@ void DetectorSwitch::pubPoseCallback(const ros::TimerEvent& event)
 		} 
 		else if (detected_aruco)
 		{	
-			std::cout << "Aruco is used "  << std::endl;
+			detect_marker.stamp = ros::Time::now();
+			detect_marker.frame_id = "Aruco";
+			pub_aruco_.publish(detect_marker);
+			// std::cout << "Aruco is used "  << std::endl;
 			range_err = sqrt(pow(aruco_Pose_.pose.position.x,2) + pow(aruco_Pose_.pose.position.y,2));
-			if (range_err < 0.6)
+			// range_err_x = fabs(atan2(aruco_Pose_.pose.position.x,aruco_Pose_.pose.position.z)) * 180  /  PI;
+			// range_err_y = fabs(atan2(aruco_Pose_.pose.position.y,aruco_Pose_.pose.position.z)) * 180  /  PI;
+			// if (range_err_x < ANGLE_1 && range_err_y < ANGLE_1)
+			if (range1 > range_err)
 			{
 				pub_tf_.publish(aruco_Pose_);
 				decrease.data = true;
@@ -155,9 +178,15 @@ void DetectorSwitch::pubPoseCallback(const ros::TimerEvent& event)
 		} 
 		else if (detected_apriltag)
 		{	
-			std::cout << "Apirltag is used "  << std::endl;
+			detect_marker.stamp = ros::Time::now();
+			detect_marker.frame_id = "Apirltag";
+			pub_apirltag_.publish(detect_marker);
+			// range_err_x = fabs(atan2(apriltag_Pose_.pose.position.x,apriltag_Pose_.pose.position.z)) * 180  /  PI;
+			// range_err_y = fabs(atan2(apriltag_Pose_.pose.position.y,apriltag_Pose_.pose.position.z)) * 180  /  PI;
+			// std::cout << "Apirltag is used "  << std::endl;
 			range_err = sqrt(pow(apriltag_Pose_.pose.position.x,2) + pow(apriltag_Pose_.pose.position.y,2));
-			if (range_err < 0.6)
+			// if (range_err_x < ANGLE_1 && range_err_y < ANGLE_1)
+			if (range1 > range_err)
 			{
 				pub_tf_.publish(apriltag_Pose_);
 				decrease.data = true;
@@ -177,9 +206,18 @@ void DetectorSwitch::pubPoseCallback(const ros::TimerEvent& event)
 	else if (cur_pose_.pose.position.z > (max_height/3))
 	{
 		if (detected_aruco){
-			std::cout << "Aruco is used "  << std::endl;
+			detect_marker.stamp = ros::Time::now();
+			detect_marker.frame_id = "Aruco";
+			pub_aruco_.publish(detect_marker);
+			// std::cout << "Aruco is used "  << std::endl;
 			range_err = sqrt(pow(aruco_Pose_.pose.position.x,2) + pow(aruco_Pose_.pose.position.y,2));
-			if (range_err < 0.35)
+			// range_err_x = fabs(atan2(aruco_Pose_.pose.position.x,aruco_Pose_.pose.position.z)) * 180  /  PI;
+			// range_err_y = fabs(atan2(aruco_Pose_.pose.position.y,aruco_Pose_.pose.position.z)) * 180  /  PI;
+			// std::cout << "Aruco is used "  << std::endl;
+			// std::cout << "x: " << range_err_x << std::endl;
+			// std::cout << "y: " << range_err_y << std::endl;
+			// if (range_err_x < ANGLE_2 && range_err_y < ANGLE_2)
+			if (range2 > range_err)
 			{
 				pub_tf_.publish(aruco_Pose_);
 				decrease.data = true;
@@ -194,10 +232,16 @@ void DetectorSwitch::pubPoseCallback(const ros::TimerEvent& event)
 			// pub_desPose_.publish(aruco_Pose_);
 		} 
 		else if (detected_whycon)
-		{
-			std::cout << "Whycon is used "  << std::endl;
+		{	
+			detect_marker.stamp = ros::Time::now();
+			detect_marker.frame_id = "Whycon";
+			pub_whycon_.publish(detect_marker);
+			// std::cout << "Whycon is used "  << std::endl;
 			range_err = sqrt(pow(whycon_Pose_.pose.position.x,2) + pow(whycon_Pose_.pose.position.y,2));
-			if (range_err < 0.35)
+			// range_err_x = fabs(atan2(whycon_Pose_.pose.position.x,whycon_Pose_.pose.position.z)) * 180  /  PI;
+			// range_err_y = fabs(atan2(whycon_Pose_.pose.position.y,whycon_Pose_.pose.position.z)) * 180  /  PI;
+			// if (range_err_x < ANGLE_2 && range_err_y < ANGLE_2)
+			if (range2 > range_err)
 			{
 				pub_tf_.publish(whycon_Pose_);
 				decrease.data = true;
@@ -212,9 +256,15 @@ void DetectorSwitch::pubPoseCallback(const ros::TimerEvent& event)
 		} 
 		else if (detected_apriltag)
 		{	
-			std::cout << "Apirltag is used "  << std::endl;
+			detect_marker.stamp = ros::Time::now();
+			detect_marker.frame_id = "Apirltag";
+			pub_apirltag_.publish(detect_marker);
+			// std::cout << "Apirltag is used "  << std::endl;
 			range_err = sqrt(pow(apriltag_Pose_.pose.position.x,2) + pow(apriltag_Pose_.pose.position.y,2));
-			if (range_err < 0.35)
+			// range_err_x = fabs(atan2(apriltag_Pose_.pose.position.x,apriltag_Pose_.pose.position.z)) * 180  /  PI;
+			// range_err_y = fabs(atan2(apriltag_Pose_.pose.position.y,apriltag_Pose_.pose.position.z)) * 180  /  PI;
+			// if (range_err_x < ANGLE_2 && range_err_y < ANGLE_2)
+			if (range2 > range_err)
 			{
 				pub_tf_.publish(apriltag_Pose_);
 				decrease.data = true;
@@ -234,11 +284,23 @@ void DetectorSwitch::pubPoseCallback(const ros::TimerEvent& event)
 	else if (cur_pose_.pose.position.z < (max_height/3))
 	{
 		if (detected_apriltag){
-			std::cout << "Apirltag is used "  << std::endl;
+			detect_marker.stamp = ros::Time::now();
+			detect_marker.frame_id = "Apirltag";
+			pub_apirltag_.publish(detect_marker);
+			// std::cout << "Apirltag is used "  << std::endl;
+			// range_err_x = fabs(atan2(apriltag_Pose_.pose.position.x,apriltag_Pose_.pose.position.z)) * 180  /  PI;
+			// range_err_y = fabs(atan2(apriltag_Pose_.pose.position.y,apriltag_Pose_.pose.position.z)) * 180  /  PI;
+			// std::cout << "Apirltag is used "  << std::endl;		
+			// std::cout << "x: " << range_err_x << std::endl;
+			// std::cout << "y: " << range_err_y << std::endl;
 			range_err = sqrt(pow(apriltag_Pose_.pose.position.x,2) + pow(apriltag_Pose_.pose.position.y,2));
-			if (range_err < 0.1)
+			// std::cout << "Apirltag range_err "  << range_err << std::endl;		
+			// std::cout << "Apirltag range3 "  << range3  << std::endl;
+			// std::cout << "Apirltag is used "  << std::endl;
+			// if ((range_err_x < ANGLE_3 && range_err_y < ANGLE_3) || (cur_pose_.pose.position.z <= 2.0 && range_err <= 0.1))
+			if (range3 > range_err)
 			{	
-
+			
 				pub_tf_.publish(apriltag_Pose_);
 				decrease.data = true;
 				pub_decrease_height.publish(decrease);
@@ -252,9 +314,15 @@ void DetectorSwitch::pubPoseCallback(const ros::TimerEvent& event)
 		} 
 		else if (detected_aruco)
 		{	
-			std::cout << "Aruco is used "  << std::endl;
+			// std::cout << "Aruco is used "  << std::endl;
+			detect_marker.stamp = ros::Time::now();
+			detect_marker.frame_id = "Aruco";
+			pub_aruco_.publish(detect_marker);
 			range_err = sqrt(pow(aruco_Pose_.pose.position.x,2) + pow(aruco_Pose_.pose.position.y,2));
-			if (range_err < 0.1)
+			// range_err_x = fabs(atan2(aruco_Pose_.pose.position.x,aruco_Pose_.pose.position.z)) * 180  /  PI;
+			// range_err_y = fabs(atan2(aruco_Pose_.pose.position.y,aruco_Pose_.pose.position.z)) * 180  /  PI;
+			// if ((range_err_x < ANGLE_3 && range_err_y < ANGLE_3) || (cur_pose_.pose.position.z <= 2.0 && range_err <= 0.1) )
+			if (range3 > range_err)
 			{
 				pub_tf_.publish(aruco_Pose_);
 				decrease.data = true;
@@ -269,9 +337,15 @@ void DetectorSwitch::pubPoseCallback(const ros::TimerEvent& event)
 		} 
 		else if (detected_whycon)
 		{	
-			std::cout << "Whycon is used "  << std::endl;
+			detect_marker.stamp = ros::Time::now();
+			detect_marker.frame_id = "Whycon";
+			pub_whycon_.publish(detect_marker);
+			// std::cout << "Whycon is used "  << std::endl;
 			range_err = sqrt(pow(whycon_Pose_.pose.position.x,2) + pow(whycon_Pose_.pose.position.y,2));
-			if (range_err < 0.1)
+			// range_err_x = fabs(atan2(whycon_Pose_.pose.position.x,whycon_Pose_.pose.position.z)) * 180  /  PI;
+			// range_err_y = fabs(atan2(whycon_Pose_.pose.position.y,whycon_Pose_.pose.position.z)) * 180  /  PI;
+			// if ((range_err_x < ANGLE_3 && range_err_y < ANGLE_3) || (cur_pose_.pose.position.z <= 2.0 && range_err <= 0.1))
+			if (range3 > range_err)
 			{
 				pub_tf_.publish(whycon_Pose_);
 				decrease.data = true;
@@ -349,6 +423,7 @@ void DetectorSwitch::mavrosPose_Callback(const geometry_msgs::PoseStamped& msg)
 void DetectorSwitch::getPoseArucoCallback(const geometry_msgs::PoseStamped& msg)
 {
 	last_time_aruco_ = TIME_NOW;
+	aruco_Pose_.header.frame_id = "aruco";
 	aruco_Pose_ = msg;
 	stable_aruco = true;
 	detected_aruco = true;
@@ -360,6 +435,7 @@ void DetectorSwitch::getPoseApriltagCallback(const tf2_msgs::TFMessage& msg)
 {
 	if(msg.transforms[0].child_frame_id == "apriltag_bundle") {
 		last_time_apriltag_ = TIME_NOW;
+		apriltag_Pose_.header.frame_id = "apirltag";
 		apriltag_Pose_.pose.position.x = msg.transforms[0].transform.translation.x;
 		apriltag_Pose_.pose.position.y = msg.transforms[0].transform.translation.y;
 		apriltag_Pose_.pose.position.z = msg.transforms[0].transform.translation.z;
@@ -377,6 +453,7 @@ void DetectorSwitch::getPoseApriltagCallback(const tf2_msgs::TFMessage& msg)
 void DetectorSwitch::getPoseWhyconCallback(const geometry_msgs::PoseStamped& msg)
 {
 	last_time_whycon_ = TIME_NOW;
+	whycon_Pose_.header.frame_id = "whycon";
 	whycon_Pose_.pose.position.x = msg.pose.position.x;
 	whycon_Pose_.pose.position.y = msg.pose.position.y;
 	whycon_Pose_.pose.position.z = msg.pose.position.z;
