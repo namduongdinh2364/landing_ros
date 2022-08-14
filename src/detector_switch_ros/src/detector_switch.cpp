@@ -95,20 +95,20 @@ void DetectorSwitch::pubPoseCallback(const ros::TimerEvent& event)
 	 * If then 0.3s the marker isn't detected.
 	 * => marker is unstable and not detect.
 	 */
-	// if((TIME_NOW - last_time_whycon_) > TIME_DURATION(0.3)) {
-	// 	detected_whycon = false;
-	// 	// ROS_WARN_STREAM("Whycon is unstable");
-	// }
+	if((TIME_NOW - last_time_whycon_) > TIME_DURATION(0.3)) {
+		detected_whycon = false;
+		// ROS_WARN_STREAM("Whycon is unstable");
+	}
 
-	// if((TIME_NOW - last_time_aruco_) > TIME_DURATION(0.3)) {
-	// 	detected_aruco = false;
-	// 	// ROS_WARN_STREAM("Aruco is unstable");
-	// }
+	if((TIME_NOW - last_time_aruco_) > TIME_DURATION(0.3)) {
+		detected_aruco = false;
+		// ROS_WARN_STREAM("Aruco is unstable");
+	}
 
-	// if((TIME_NOW - last_time_apriltag_) > TIME_DURATION(0.3)) {
-	// 	detected_apriltag = false;
-	// 	// ROS_WARN_STREAM("Apriltag is unstable");
-	// }
+	if((TIME_NOW - last_time_apriltag_) > TIME_DURATION(0.3)) {
+		detected_apriltag = false;
+		// ROS_WARN_STREAM("Apriltag is unstable");
+	}
 
 	if (!land) {
 		max_height = cur_pose_.pose.position.z;
@@ -128,9 +128,9 @@ void DetectorSwitch::pubPoseCallback(const ros::TimerEvent& event)
 	if (cur_pose_.pose.position.z > (2* max_height)/3)
 	{
 		if (detected_whycon){
-			detect_marker.stamp = ros::Time::now();
-			detect_marker.frame_id = "Whycon";
-			pub_whycon_.publish(detect_marker);
+			// detect_marker.stamp = ros::Time::now();
+			// detect_marker.frame_id = "Whycon";
+			// pub_whycon_.publish(detect_marker);
 			// detect_marker.data = true;
 			// detect_marker.header
 			range_err = sqrt(pow(whycon_Pose_.pose.position.x,2) + pow(whycon_Pose_.pose.position.y,2));
@@ -155,9 +155,9 @@ void DetectorSwitch::pubPoseCallback(const ros::TimerEvent& event)
 		} 
 		else if (detected_aruco)
 		{	
-			detect_marker.stamp = ros::Time::now();
-			detect_marker.frame_id = "Aruco";
-			pub_aruco_.publish(detect_marker);
+			// detect_marker.stamp = ros::Time::now();
+			// detect_marker.frame_id = "Aruco";
+			// pub_aruco_.publish(detect_marker);
 			// std::cout << "Aruco is used "  << std::endl;
 			range_err = sqrt(pow(aruco_Pose_.pose.position.x,2) + pow(aruco_Pose_.pose.position.y,2));
 			// range_err_x = fabs(atan2(aruco_Pose_.pose.position.x,aruco_Pose_.pose.position.z)) * 180  /  PI;
@@ -178,9 +178,9 @@ void DetectorSwitch::pubPoseCallback(const ros::TimerEvent& event)
 		} 
 		else if (detected_apriltag)
 		{	
-			detect_marker.stamp = ros::Time::now();
-			detect_marker.frame_id = "Apirltag";
-			pub_apirltag_.publish(detect_marker);
+			// detect_marker.stamp = ros::Time::now();
+			// detect_marker.frame_id = "Apirltag";
+			// pub_apirltag_.publish(detect_marker);
 			// range_err_x = fabs(atan2(apriltag_Pose_.pose.position.x,apriltag_Pose_.pose.position.z)) * 180  /  PI;
 			// range_err_y = fabs(atan2(apriltag_Pose_.pose.position.y,apriltag_Pose_.pose.position.z)) * 180  /  PI;
 			// std::cout << "Apirltag is used "  << std::endl;
@@ -206,9 +206,9 @@ void DetectorSwitch::pubPoseCallback(const ros::TimerEvent& event)
 	else if (cur_pose_.pose.position.z > (max_height/3))
 	{
 		if (detected_aruco){
-			detect_marker.stamp = ros::Time::now();
-			detect_marker.frame_id = "Aruco";
-			pub_aruco_.publish(detect_marker);
+			// detect_marker.stamp = ros::Time::now();
+			// detect_marker.frame_id = "Aruco";
+			// pub_aruco_.publish(detect_marker);
 			// std::cout << "Aruco is used "  << std::endl;
 			range_err = sqrt(pow(aruco_Pose_.pose.position.x,2) + pow(aruco_Pose_.pose.position.y,2));
 			// range_err_x = fabs(atan2(aruco_Pose_.pose.position.x,aruco_Pose_.pose.position.z)) * 180  /  PI;
@@ -233,9 +233,9 @@ void DetectorSwitch::pubPoseCallback(const ros::TimerEvent& event)
 		} 
 		else if (detected_whycon)
 		{	
-			detect_marker.stamp = ros::Time::now();
-			detect_marker.frame_id = "Whycon";
-			pub_whycon_.publish(detect_marker);
+			// detect_marker.stamp = ros::Time::now();
+			// detect_marker.frame_id = "Whycon";
+			// pub_whycon_.publish(detect_marker);
 			// std::cout << "Whycon is used "  << std::endl;
 			range_err = sqrt(pow(whycon_Pose_.pose.position.x,2) + pow(whycon_Pose_.pose.position.y,2));
 			// range_err_x = fabs(atan2(whycon_Pose_.pose.position.x,whycon_Pose_.pose.position.z)) * 180  /  PI;
@@ -256,9 +256,9 @@ void DetectorSwitch::pubPoseCallback(const ros::TimerEvent& event)
 		} 
 		else if (detected_apriltag)
 		{	
-			detect_marker.stamp = ros::Time::now();
-			detect_marker.frame_id = "Apirltag";
-			pub_apirltag_.publish(detect_marker);
+			// detect_marker.stamp = ros::Time::now();
+			// detect_marker.frame_id = "Apirltag";
+			// pub_apirltag_.publish(detect_marker);
 			// std::cout << "Apirltag is used "  << std::endl;
 			range_err = sqrt(pow(apriltag_Pose_.pose.position.x,2) + pow(apriltag_Pose_.pose.position.y,2));
 			// range_err_x = fabs(atan2(apriltag_Pose_.pose.position.x,apriltag_Pose_.pose.position.z)) * 180  /  PI;
@@ -284,9 +284,9 @@ void DetectorSwitch::pubPoseCallback(const ros::TimerEvent& event)
 	else if (cur_pose_.pose.position.z < (max_height/3))
 	{
 		if (detected_apriltag){
-			detect_marker.stamp = ros::Time::now();
-			detect_marker.frame_id = "Apirltag";
-			pub_apirltag_.publish(detect_marker);
+			// detect_marker.stamp = ros::Time::now();
+			// detect_marker.frame_id = "Apirltag";
+			// pub_apirltag_.publish(detect_marker);
 			// std::cout << "Apirltag is used "  << std::endl;
 			// range_err_x = fabs(atan2(apriltag_Pose_.pose.position.x,apriltag_Pose_.pose.position.z)) * 180  /  PI;
 			// range_err_y = fabs(atan2(apriltag_Pose_.pose.position.y,apriltag_Pose_.pose.position.z)) * 180  /  PI;
@@ -315,9 +315,9 @@ void DetectorSwitch::pubPoseCallback(const ros::TimerEvent& event)
 		else if (detected_aruco)
 		{	
 			// std::cout << "Aruco is used "  << std::endl;
-			detect_marker.stamp = ros::Time::now();
-			detect_marker.frame_id = "Aruco";
-			pub_aruco_.publish(detect_marker);
+			// detect_marker.stamp = ros::Time::now();
+			// detect_marker.frame_id = "Aruco";
+			// pub_aruco_.publish(detect_marker);
 			range_err = sqrt(pow(aruco_Pose_.pose.position.x,2) + pow(aruco_Pose_.pose.position.y,2));
 			// range_err_x = fabs(atan2(aruco_Pose_.pose.position.x,aruco_Pose_.pose.position.z)) * 180  /  PI;
 			// range_err_y = fabs(atan2(aruco_Pose_.pose.position.y,aruco_Pose_.pose.position.z)) * 180  /  PI;
@@ -337,9 +337,9 @@ void DetectorSwitch::pubPoseCallback(const ros::TimerEvent& event)
 		} 
 		else if (detected_whycon)
 		{	
-			detect_marker.stamp = ros::Time::now();
-			detect_marker.frame_id = "Whycon";
-			pub_whycon_.publish(detect_marker);
+			// detect_marker.stamp = ros::Time::now();
+			// detect_marker.frame_id = "Whycon";
+			// pub_whycon_.publish(detect_marker);
 			// std::cout << "Whycon is used "  << std::endl;
 			range_err = sqrt(pow(whycon_Pose_.pose.position.x,2) + pow(whycon_Pose_.pose.position.y,2));
 			// range_err_x = fabs(atan2(whycon_Pose_.pose.position.x,whycon_Pose_.pose.position.z)) * 180  /  PI;

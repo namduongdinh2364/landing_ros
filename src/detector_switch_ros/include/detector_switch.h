@@ -19,7 +19,7 @@
 #include <std_msgs/Bool.h>
 #include <math.h>
 
-#define ANGLE_1 2.0
+#define ANGLE_1 15.0
 #define ANGLE_2 10.0
 #define ANGLE_3 10.0
 #define PI 3.14159265

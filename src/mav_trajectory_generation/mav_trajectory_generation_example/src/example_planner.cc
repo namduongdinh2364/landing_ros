@@ -37,7 +37,7 @@ ExamplePlanner::ExamplePlanner(ros::NodeHandle& nh) :
   markerposeSub_ = nh_.subscribe("/cmd/set_desposition/local", 1, &ExamplePlanner::markerposeCallback, this, ros::TransportHints().tcpNoDelay());
   decrese_height_ = nh_.subscribe("/decrease_height", 1,  &ExamplePlanner::decreaseheightCallback, this,ros::TransportHints().tcpNoDelay());
 
-  cmdloop_timer_ = nh_.createTimer(ros::Duration(0.1), &ExamplePlanner::cmdloopCallback, this);
+  cmdloop_timer_ = nh_.createTimer(ros::Duration(2.0), &ExamplePlanner::cmdloopCallback, this);
   land_service_ = nh_.advertiseService("land4", &ExamplePlanner::enableLandCallback, this);
 }
 
@@ -152,12 +152,12 @@ void ExamplePlanner::cmdloopCallback(const ros::TimerEvent &event){
             {
               // setMaxSpeed(0.5);
               // setMaxAcc(0.4);
-              setMaxSpeed(0.8);
-              setMaxAcc(0.6);
+              setMaxSpeed(0.2);
+              setMaxAcc(0.2);
             }
             else{
-              setMaxSpeed(0.3);
-              setMaxAcc(0.3);
+              setMaxSpeed(0.2);
+              setMaxAcc(0.1);
             }
 
             planTrajectory(pointUpdate, velocity, &trajectory);

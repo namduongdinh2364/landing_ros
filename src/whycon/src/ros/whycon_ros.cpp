@@ -66,22 +66,22 @@ void whycon::WhyConROS::on_image(const sensor_msgs::ImageConstPtr& image_msg, co
   }
   is_tracking = system->localize(image, should_reset/*!is_tracking*/, max_attempts, max_refine);
 
-    // if (!is_tracking)
-    // {
-    //     targets -= 1;
-    //     system = boost::make_shared<whycon::LocalizationSystem>(targets, image.size().width, image.size().height, cv::Mat(camera_model.fullIntrinsicMatrix()), dis_coeff_temp, parameters);
-    //     if (targets == 0)
-    //     {
-    //         targets = 4;
-    //         system = boost::make_shared<whycon::LocalizationSystem>(targets, image.size().width, image.size().height, cv::Mat(camera_model.fullIntrinsicMatrix()), dis_coeff_temp, parameters);
-    //     }
-    // }
+    if (!is_tracking)
+    {
+        targets -= 1;
+        system = boost::make_shared<whycon::LocalizationSystem>(targets, image.size().width, image.size().height, cv::Mat(camera_model.fullIntrinsicMatrix()), dis_coeff_temp, parameters);
+        if (targets == 0)
+        {
+            targets = 4;
+            system = boost::make_shared<whycon::LocalizationSystem>(targets, image.size().width, image.size().height, cv::Mat(camera_model.fullIntrinsicMatrix()), dis_coeff_temp, parameters);
+        }
+    }
 
   if (is_tracking) {
     publish_results(image_msg->header, cv_ptr);
     should_reset = false;
-    // targets++;
-    // system = boost::make_shared<whycon::LocalizationSystem>(targets, image.size().width, image.size().height, cv::Mat(camera_model.fullIntrinsicMatrix()), dis_coeff_temp, parameters);
+    targets++;
+    system = boost::make_shared<whycon::LocalizationSystem>(targets, image.size().width, image.size().height, cv::Mat(camera_model.fullIntrinsicMatrix()), dis_coeff_temp, parameters);
   }
   else if (image_pub.getNumSubscribers() != 0)
     image_pub.publish(cv_ptr);
