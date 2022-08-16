@@ -123,13 +123,23 @@ void whycon::WhyConROS::publish_results(const std_msgs::Header& header, const cv
 
     // draw each target
     if (publish_images) {
-      std::ostringstream ostr;
+      std::ostringstream ostr, ostr1;
       ostr << std::fixed << std::setprecision(2);
-			ostr << coord << " " << i;
+      ostr1 << std::fixed << std::setprecision(2);
+      ostr1 << "[Whycon]";
+      ostr << "[" << i << "]";
+      ostr1 << "  [ " << i << " ]" << "x: " << coord(0) << " y: " << coord(1) << " z: " << coord(2);
+      cv::putText(output_image, //target image
+            ostr1.str(), //text
+            cv::Point(30 , 30 + (i * 60)), //top-left position
+            cv::FONT_HERSHEY_DUPLEX,
+            1.0,
+            CV_RGB(26,249,249), //font color
+            2);
       circle.draw(output_image, ostr.str(), cv::Vec3b(0,255,255));
 			/*whycon::CircleDetector::Circle new_circle = circle.improveEllipse(cv_ptr->image);
 			new_circle.draw(output_image, ostr.str(), cv::Vec3b(0,255,0));*/
-			cv::circle(output_image, camera_model.project3dToPixel(cv::Point3d(coord)), 1, cv::Scalar(255,0,255), 1, cv::LINE_AA);
+			cv::circle(output_image, camera_model.project3dToPixel(cv::Point3d(coord)), 1, cv::Scalar(26,249,249), 2, cv::LINE_AA);
     }
 
     if (publish_poses) {

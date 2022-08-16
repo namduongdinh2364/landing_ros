@@ -42,7 +42,8 @@ public:
 		pose_pub = nh.advertise<geometry_msgs::PoseStamped>("pose", 10);
 		nh.param<std::string>("reference_frame", reference_frame, "aruco");
 
-		cameraMatrix = Mat(1, 9, CV_64F);
+		// cameraMatrix = Mat(1, 9, CV_64F);
+		cameraMatrix = Mat(3, 3, CV_64FC1);
 		distCoeffs = Mat(1, 5, CV_64F);
 		int i;
 		for (i = 0; i < 5; i++)
@@ -126,6 +127,13 @@ public:
 						poseMsg.pose.position.y = tvec.at<double>(1);
 						poseMsg.pose.position.z = tvec.at<double>(2);
 						pose_pub.publish(poseMsg);
+						std::ostringstream ostr;
+						ostr << std::fixed << std::setprecision(2);
+						ostr << "[Aruco] :"<<" x: " << (poseMsg.pose.position.x * 100) /100
+						<<" y: " << (poseMsg.pose.position.y * 100) /100 << " z: " << (poseMsg.pose.position.z * 100) /100;
+
+						cv::putText(inImage, ostr.str(), cv::Point(100 , 100), cv::FONT_HERSHEY_DUPLEX, 1.0, CV_RGB(26,249,249), 1.0);
+						cv::drawFrameAxes(inImage, cameraMatrix, distCoeffs, rvec, tvec, 1.0, 2);
 					}
 					
 					// std::cout << "tvec: " << tvec << std::endl;
@@ -152,17 +160,29 @@ public:
 	// wait for one camerainfo, then shut down that subscriber
 	void cam_info_callback(const sensor_msgs::CameraInfo &msg)
 	{
-		int i;
+		// int i;
 
-		for (i = 0; i < 9; i++) {
-			cameraMatrix.at<double>(0, i) = msg.K[i];
-			// std::cout << cameraMatrix.at<float>(0, i) << "---"<< std::endl;
-			// cameraMatrix.push_back(msg.K[i]);
-		}
-		cameraMatrix = cameraMatrix.reshape(3, 3);
-		cam_info_received = true;
-		std::cout << "Get cameraMaxtrix done!!!" << std::endl;
+		// for (i = 0; i < 9; i++) {
+		// 	cameraMatrix.at<double>(0, i) = msg.K[i];
+		// 	// std::cout << cameraMatrix.at<float>(0, i) << "---"<< std::endl;
+		// 	// cameraMatrix.push_back(msg.K[i]);
+		// }
+		// cameraMatrix = cameraMatrix.reshape(3, 3);
+		// cam_info_received = true;
+		// std::cout << "Get cameraMaxtrix done!!!" << std::endl;
+		// cam_info_sub.shutdown();
+
+		cameraMatrix.at<double>(0, 0) = msg.K[0];
+		cameraMatrix.at<double>(0, 1) = msg.K[1];
+		cameraMatrix.at<double>(0, 2) = msg.K[2];
+		cameraMatrix.at<double>(1, 0) = msg.K[3];
+		cameraMatrix.at<double>(1, 1) = msg.K[4];
+		cameraMatrix.at<double>(1, 2) = msg.K[5];
+		cameraMatrix.at<double>(2, 0) = msg.K[6];
+		cameraMatrix.at<double>(2, 1) = msg.K[7];
+		cameraMatrix.at<double>(2, 2) = msg.K[8];
 		cam_info_sub.shutdown();
+
 	}
 };
 

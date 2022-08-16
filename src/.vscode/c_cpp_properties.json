@@ -1,0 +1,33 @@
+{
+    "configurations": [
+        {
+            "browse": {
+                "databaseFilename": "${default}",
+                "limitSymbolsToIncludedHeaders": false
+            },
+            "includePath": [
+                "/home/ducanh/ducanh_ws/ducanh_landing_ws/landing_ros/devel/include/**",
+                "/opt/ros/noetic/include/**",
+                "/home/ducanh/ducanh_ws/ducanh_landing_ws/landing_ros/src/apriltag_ros/apriltag_ros/include/**",
+                "/home/ducanh/ducanh_ws/ducanh_landing_ws/landing_ros/src/mavros_controllers/controller_msgs/include/**",
+                "/home/ducanh/ducanh_ws/ducanh_landing_ws/landing_ros/src/detector_switch_ros/include/**",
+                "/home/ducanh/ducanh_ws/ducanh_landing_ws/landing_ros/src/mavros_controllers/geometric_controller/include/**",
+                "/home/ducanh/ducanh_ws/ducanh_landing_ws/landing_ros/src/mav_comm/mav_msgs/include/**",
+                "/home/ducanh/ducanh_ws/ducanh_landing_ws/landing_ros/src/mav_comm/mav_planning_msgs/include/**",
+                "/home/ducanh/ducanh_ws/ducanh_landing_ws/landing_ros/src/mavros_controllers/trajectory_publisher/include/**",
+                "/home/ducanh/ducanh_ws/ducanh_landing_ws/landing_ros/src/whycon/include/**",
+                "/usr/include/**",
+                "${workspaceFolder}/mav_trajectory_generation/mav_trajectory_generation_ros/include",
+                "${workspaceFolder}/mav_trajectory_generation/mav_trajectory_generation/include",
+                "${workspaceFolder}/mav_trajectory_generation/mav_visualization/include",
+                "${workspaceFolder}/mav_trajectory_generation/mav_trajectory_generation_example/include"
+            ],
+            "name": "ROS",
+            "intelliSenseMode": "gcc-x64",
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "gnu11",
+            "cppStandard": "c++14"
+        }
+    ],
+    "version": 4
+}

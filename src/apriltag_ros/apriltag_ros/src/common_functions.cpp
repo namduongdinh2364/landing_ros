@@ -397,6 +397,12 @@ AprilTagDetectionArray TagDetector::detectTags (
                                                  tag_transform.stamp_,
                                                  image->header.frame_id,
                                                  detection_names[i]));
+      std::ostringstream ostr;
+						ostr << std::fixed << std::setprecision(2);
+						ostr << "[AprilTag] :"<<" x: " << (pose.pose.position.x * 100) /100
+						<<" y: " << (pose.pose.position.y * 100) /100 << " z: " << (pose.pose.position.z * 100) /100;
+
+						cv::putText(image->image, ostr.str(), cv::Point(100 , 100), cv::FONT_HERSHEY_DUPLEX, 1.0, CV_RGB(26,249,249), 1.0);                                         
     }
   }
   /*you can add a topic to public pose of marker at here.*/
