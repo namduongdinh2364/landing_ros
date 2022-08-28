@@ -35,8 +35,6 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
-
-
 file(GLOB SOURCES
                 src/detector_switch_node.cpp
                 src/detector_switch.cpp

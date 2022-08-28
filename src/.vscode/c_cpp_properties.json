@@ -1,0 +1,37 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "${default}",
+        "limitSymbolsToIncludedHeaders": false
+      },
+      "includePath": [
+        "/home/nam97/landing_ros/devel/include/**",
+        "/opt/ros/noetic/include/**",
+        "/home/nam97/landing_ros/src/apriltag_ros/apriltag_ros/include/**",
+        "/home/nam97/landing_ros/src/mavros_controllers/controller_msgs/include/**",
+        "/home/nam97/landing_ros/src/detector_switch_ros/include/**",
+        "/home/nam97/landing_ros/src/eigen_checks/include/**",
+        "/home/nam97/landing_ros/src/mavros_controllers/geometric_controller/include/**",
+        "/home/nam97/landing_ros/src/mav_comm/mav_msgs/include/**",
+        "/home/nam97/landing_ros/src/mav_comm/mav_planning_msgs/include/**",
+        "/home/nam97/landing_ros/src/mav_trajectory_generation/mav_trajectory_generation/include/**",
+        "/home/nam97/landing_ros/src/mav_trajectory_generation/mav_trajectory_generation_example/include/**",
+        "/home/nam97/landing_ros/src/mav_trajectory_generation/mav_trajectory_generation_ros/include/**",
+        "/home/nam97/landing_ros/src/mav_trajectory_generation/mav_visualization/include/**",
+        "/home/nam97/landing_ros/src/nlopt/include/**",
+        "/home/nam97/landing_ros/src/offboard/include/**",
+        "/home/nam97/landing_ros/src/realsense-ros/realsense2_camera/include/**",
+        "/home/nam97/landing_ros/src/mavros_controllers/trajectory_publisher/include/**",
+        "/home/nam97/landing_ros/src/whycon/include/**",
+        "/usr/include/**"
+      ],
+      "name": "ROS",
+      "intelliSenseMode": "gcc-x64",
+      "compilerPath": "/usr/bin/gcc",
+      "cStandard": "gnu11",
+      "cppStandard": "c++14"
+    }
+  ],
+  "version": 4
+}

@@ -168,7 +168,7 @@ public:
 
 int main(int argc, char **argv)
 {
-  ros::init(argc, argv, "aruco_bundle");
+  ros::init(argc, argv, "aruco_detector");
 
   ArucoDetector node;
 
