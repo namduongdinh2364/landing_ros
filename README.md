@@ -55,16 +55,22 @@ catkin build
 source ~/catkin_ws/devel/setup.bash
 ```
 ## Running the code
-The following launch files enable UAV landing with the geometric controller:
 
 ``` bash
-roslaunch geometric_controller sitl_trajectory_track_marker.launch
+roslaunch pid_controller sitl_landing_marker.launch
 ```
-Another terminal runs:
+Another terminal 1 run:
 ``` bash
-rosrun geometric_controller landing
+roslaunch detector_switch_ros detector_switch.launch
+```
+Another terminal 2 run:
+``` bash
+rosrun pid_controller landing_service
 ```
 
-
+To return home run:
+``` bash
+rosservice call /return_home "data: true"
+```
 
 
