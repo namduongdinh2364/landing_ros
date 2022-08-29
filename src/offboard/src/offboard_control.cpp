@@ -26,6 +26,7 @@
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
 #include <std_srvs/SetBool.h>
+#include <std_msgs/Bool.h>
 
 #include "pid.h"
 
@@ -56,7 +57,7 @@ private:
 	ros::NodeHandle nh_;
 	ros::NodeHandle nh_private_;
 	ros::Subscriber state_sub, imu_sub, local_position_sub;
-	ros::Subscriber marker_pose_sub;
+	ros::Subscriber marker_pose_sub, decrese_height_sub;
 	ros::Publisher cam_info_pub;
 	ros::Publisher velocity_pub, local_pos_pub, setRaw_pub;
 	ros::Publisher systemstatusPub_;
@@ -65,8 +66,8 @@ private:
 	ros::Timer cmdloop_timer_, statusloop_timer_;
 
 	Matrix3f R;
-	Eigen::Matrix3d cam2drone_matrix_;
-	Eigen::Vector3d targetPos_, markerPos_;
+	Eigen::Matrix3d cam2drone_matrix_, mavros_imu_data_;
+	Eigen::Vector3d targetPos_, markerPos_, markerPosNEU_;
 	Eigen::Vector3d mavPos_;
 	Eigen::Vector4d mavAtt_;
 
@@ -79,7 +80,7 @@ private:
 	mavros_msgs::CommandBool arm_cmd_;
 
 	bool sim_enable_;
-	bool startLanding;
+	bool startLanding, decrease_height_;
 	MAV_STATE companion_state_ = MAV_STATE::MAV_STATE_ACTIVE;
 
 	enum FlightState {
@@ -103,7 +104,8 @@ public:
 	: nh_(nh),
 	nh_private_(nh_private),
 	node_state(WAITING_FOR_HOME_POSE),
-	startLanding(false)
+	startLanding(false),
+	decrease_height_(false)
 	{
 		nh_private_.param<bool>("enable_sim", sim_enable_, true);
 		nh_private_.param<double>("init_pos_x", initTargetPos_x_, 0.0);
@@ -111,44 +113,74 @@ public:
 		nh_private_.param<double>("init_pos_z", initTargetPos_z_, 8.0);
 		nh_private_.param<int>("control_mode", control_mode_, 0);
 
-		pidx = new PID(0.75, -0.75, 0.08, 0.00005, 0.0008); // max, min, kp, kd, ki
-		pidy = new PID(0.75, -0.75, 0.085, 0.00006, 0.00085);
+		pidx = new PID(0.75, -0.75, 0.09, 0.00005, 0.0008); // max, min, kp, kd, ki
+		pidy = new PID(0.75, -0.75, 0.095, 0.00006, 0.00085);
 
 		/** setup subscribe and public*/ 
 		local_position_sub = nh_.subscribe
 			("mavros/local_position/pose", 1, &Controller::mavrosPoseCallback, this, ros::TransportHints().tcpNoDelay());
+
 		state_sub = nh_.subscribe
 			("mavros/state", 10, &Controller::state_cb, this, ros::TransportHints().tcpNoDelay());
+
 		imu_sub = nh_.subscribe
 			("/mavros/imu/data", 10, &Controller::imuCallback, this, ros::TransportHints().tcpNoDelay());
 
 		local_pos_pub = nh_.advertise <geometry_msgs::PoseStamped>
 			("mavros/setpoint_position/local", 10);
+
 		arming_client_ = nh_.serviceClient <mavros_msgs::CommandBool>
 			("mavros/cmd/arming");
+
 		set_mode_client_ = nh_.serviceClient <mavros_msgs::SetMode>
 			("mavros/set_mode");
+
 		velocity_pub   = nh_.advertise <geometry_msgs::TwistStamped>
 			("/mavros/setpoint_velocity/cmd_vel", 10 );
+
 		setRaw_pub = nh_.advertise<mavros_msgs::PositionTarget>("/mavros/setpoint_raw/local",10);
 
 		systemstatusPub_ = nh_.advertise<mavros_msgs::CompanionProcessStatus>
 			("mavros/companion_process/status", 1);
 
 		cmdloop_timer_ = nh_.createTimer(ros::Duration(0.1), &Controller::cmdloopCallback, this);
+
 		statusloop_timer_ = nh_.createTimer(ros::Duration(1), &Controller::statusloopCallback, this);
 
 		marker_pose_sub = nh_.subscribe
-			("/aruco_detector/pose", 1, &Controller::markerposeCallback, this, ros::TransportHints().tcpNoDelay());
+			("/tf_marker", 1, &Controller::markerposeCallback, this, ros::TransportHints().tcpNoDelay());
 
 		return_home_service_ = nh_.advertiseService("return_home", &Controller::enableReturnHomeService, this);
+
 		start_land_service_ = nh_.advertiseService("start_land", &Controller::enableLandService, this);
+
+		decrese_height_sub = nh_.subscribe
+			("/decrease_height", 1, &Controller::decreaseHeightCallback, this, ros::TransportHints().tcpNoDelay());
 
 		/* Rotation matrix from camera to UAV. It's customizable with different setup */
 		cam2drone_matrix_ << 0.0 , -1.0 , 0.0 , -1.0 , 0.0 , 0.0 , 0.0 , 0.0 , -1.0;
 		targetPos_ << initTargetPos_x_, initTargetPos_y_, initTargetPos_z_;
 		markerPos_ << 0.0, 0.0, 0.0;
 
+	}
+
+	void imuCallback(const sensor_msgs::Imu& msg)
+	{
+		double x, y, z, w;
+		Quaterniond quat;
+
+		x = msg.orientation.x;
+		y = msg.orientation.y;
+		z = msg.orientation.z;
+		w = msg.orientation.w;
+		/* making a quaternion of position */
+		quat = Eigen::Quaterniond(w, x, y, z);
+		/* making rotation matrix from quaternion */
+		mavros_imu_data_ = quat.toRotationMatrix();
+	}
+
+	void decreaseHeightCallback(const std_msgs::Bool &msg){
+		decrease_height_ = msg.data;
 	}
 
 	bool enableLandService(std_srvs::SetBool::Request &request, std_srvs::SetBool::Response &response) {
@@ -163,22 +195,22 @@ public:
 		return true;
 	}
 
-	void imuCallback(const sensor_msgs::Imu::ConstPtr &msg)
-	{
-		double x,y,z,w;
+	// void imuCallback(const sensor_msgs::Imu::ConstPtr &msg)
+	// {
+	// 	double x,y,z,w;
 
-		x = msg->orientation.x;
-		y = msg->orientation.y;
-		z = msg->orientation.z;
-		w = msg->orientation.w;
-		/* making a quaternion of position */
-		Quaternionf quat;
-		quat = Eigen::Quaternionf(w,x,y,z);
+	// 	x = msg->orientation.x;
+	// 	y = msg->orientation.y;
+	// 	z = msg->orientation.z;
+	// 	w = msg->orientation.w;
+	// 	/* making a quaternion of position */
+	// 	Quaternionf quat;
+	// 	quat = Eigen::Quaternionf(w,x,y,z);
 
-		/*making rotation matrix from quaternion*/
-		R = quat.toRotationMatrix();
-		// cout << "R=" << endl << R << endl;
-	}
+	// 	/*making rotation matrix from quaternion*/
+	// 	R = quat.toRotationMatrix();
+	// 	// cout << "R=" << endl << R << endl;
+	// }
 
 	Eigen::Vector3d toEigen(const geometry_msgs::Point &p)
 	{
@@ -274,8 +306,32 @@ public:
 			case MISSION_EXECUTION: {
 				switch (control_mode_)
 				{
-					case POSITION_MODE:
-						pubPositionToFCU(targetPos_);
+					case POSITION_MODE: {
+
+						Eigen::Vector3d desiredPos;
+						if (startLanding) {
+							/* Marker ----> NEU */
+							markerPosNEU_ = mavros_imu_data_ * markerPos_;
+							desiredPos(0) = markerPosNEU_(0) + mavPos_(0);
+							desiredPos(1) = markerPosNEU_(1) + mavPos_(1);
+
+							if (decrease_height_) {
+								desiredPos(2) =  mavPos_(2) - FACTORZ;
+							}
+							else {
+								desiredPos(2) =  mavPos_(2);
+							}
+
+							if (mavPos_(2) >= 3.0) {
+								control_mode_ = VELOCITY_MODE;
+							}
+						}
+						else {
+							desiredPos = targetPos_;
+						}
+
+						pubPositionToFCU(desiredPos);
+					}
 						break;
 
 					case VELOCITY_MODE: {
@@ -285,12 +341,16 @@ public:
 
 							desiredPos(0) = markerPos_(0);
 							desiredPos(1) = markerPos_(1);
-							double range_err = sqrt(pow(desiredPos(0),2) + pow(desiredPos(1),2));
-							if (abs(range_err) < 0.5) {
+
+							if (decrease_height_) {
 								desiredPos(2) =  mavPos_(2) - FACTORZ;
 							}
 							else {
 								desiredPos(2) =  mavPos_(2);
+							}
+
+							if (mavPos_(2) < 3.0) {
+								control_mode_ = POSITION_MODE;
 							}
 
 						}
@@ -308,6 +368,12 @@ public:
 					default:
 						break;
 				}
+
+				/* next time will check by z in camera frame */
+				if (mavPos_(2) < 0.7) {
+					node_state = LANDED;
+				}
+
 			}
 			break;
 

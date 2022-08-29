@@ -25,6 +25,7 @@
 #define PI 3.14159265
 
 using namespace std;
+using namespace Eigen;
 
 class DetectorSwitch
 {
@@ -34,14 +35,7 @@ private:
 	ros::Subscriber sub_tf_whycon_;
 	ros::Subscriber sub_tf_apriltag_;
 	ros::Subscriber sub_tf_aruco_;
-	ros::Publisher pub_tf_;
-
-	ros::Publisher pub_aruco_;
-	ros::Publisher pub_whycon_;
-	ros::Publisher pub_apirltag_;
-
-
-
+	ros::Publisher pub_tf_marker_;
 
 	ros::Publisher pub_decrease_height;
 
@@ -49,19 +43,33 @@ private:
 	ros::Timer stable_loop_;
 	ros::Subscriber sub_mavros_local_position_;
 	ros::Time last_time_whycon_, last_time_apriltag_, last_time_aruco_;
-	ros::Publisher pub_desPose_;
-	ros::ServiceServer land_service_;
+
+	ros::ServiceServer start_land_service_;
+
 	geometry_msgs::PoseStamped apriltag_Pose_, whycon_Pose_, aruco_Pose_, cur_pose_;
 	std_msgs::Bool decrease;
-	// std_msgs::Bool detect_marker;
-	double max_height, range_err, range_err_x, range_err_y;
-	int type_;
+
+	double max_height, range_err;
+
 	int numStableWhy, numStableAru, numStableApr;
 	bool detected_apriltag, detected_whycon, detected_aruco;
-	bool stable_apriltag, stable_whycon, stable_aruco,land;
+	bool stable_apriltag, stable_whycon, stable_aruco;
 	bool lock_height;
 	double range1, range2, range3;
-	std_msgs::Header detect_marker;
+
+	std::vector<bool> priority_1 = {false, false, false};
+	std::vector<bool> priority_2 = {false, false, false};
+	std::vector<bool> priority_3 = {false, false, false};
+
+	Eigen::Vector3d whyconPose, arucoPose, aprilPose;
+
+	std::vector<Vector3d> arrayPose_1;
+	std::vector<Vector3d> arrayPose_2;
+	std::vector<Vector3d> arrayPose_3;
+
+	geometry_msgs::PoseStamped markerPose;
+
+	bool startLand;
 
 public:
 
