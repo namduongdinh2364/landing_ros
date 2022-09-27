@@ -8,6 +8,8 @@
 #include <opencv2/aruco.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/opencv.hpp>
+#include <eigen3/Eigen/Core>
+#include <eigen3/Eigen/Dense>
 
 using namespace std;
 using namespace sensor_msgs;
@@ -129,7 +131,19 @@ public:
 					}
 					
 					// std::cout << "tvec: " << tvec << std::endl;
-					// std::cout << "rvec: " << tvec<< std::endl;
+
+					// cv::Matx33d R;
+					// cv::Rodrigues(rvec, R);
+					// Eigen::Matrix3d wRo;
+					// wRo << R(0,0), R(0,1), R(0,2), R(1,0), R(1,1), R(1,2), R(2,0), R(2,1), R(2,2);
+					// Eigen::Matrix3d inverM = wRo.inverse();
+					// std::cout << "rvec: " << wRo << std::endl;
+					// std::cout << "rvec inverse: " << inverM << std::endl;
+					// std::cout << "rvecRPY: " << wRo.eulerAngles(0, 1, 2) * 180 /3.14 << std::endl;
+					// Eigen::Vector3d v3dPoint (tvec.at<double>(2), tvec.at<double>(0), tvec.at<double>(1));
+					// v3dPoint << tvec.at<double>(0), tvec.at<double>(1), tvec.at<double>(2);
+					// std::cout << "Marker Frame: " << inverM* v3dPoint << std::endl;
+
 					if (image_pub.getNumSubscribers() > 0)
 					{
 						// show input with augmented information

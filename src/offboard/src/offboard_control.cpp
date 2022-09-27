@@ -34,6 +34,8 @@
 #define	POSITION_MODE	0
 #define	VELOCITY_MODE	4
 
+#define	DISTANCE_ON_MARKER(x)	x*(-1)
+
 using namespace std;
 using namespace sensor_msgs;
 using namespace Eigen;
@@ -113,8 +115,8 @@ public:
 		nh_private_.param<double>("init_pos_z", initTargetPos_z_, 8.0);
 		nh_private_.param<int>("control_mode", control_mode_, 0);
 
-		pidx = new PID(0.75, -0.75, 0.09, 0.00005, 0.0008); // max, min, kp, kd, ki
-		pidy = new PID(0.75, -0.75, 0.095, 0.00006, 0.00085);
+		pidx = new PID(0.75, -0.75, 0.2, 0.00005, 0.0008); // max, min, kp, kd, ki
+		pidy = new PID(0.75, -0.75, 0.2, 0.00006, 0.00085);
 
 		/** setup subscribe and public*/ 
 		local_position_sub = nh_.subscribe
@@ -310,7 +312,7 @@ public:
 
 						Eigen::Vector3d desiredPos;
 						if (startLanding) {
-							/* Marker ----> NEU */
+							/* Marker ----> NEU Frame*/
 							markerPosNEU_ = mavros_imu_data_ * markerPos_;
 							desiredPos(0) = markerPosNEU_(0) + mavPos_(0);
 							desiredPos(1) = markerPosNEU_(1) + mavPos_(1);
@@ -322,7 +324,7 @@ public:
 								desiredPos(2) =  mavPos_(2);
 							}
 
-							if (mavPos_(2) >= 3.0) {
+							if (DISTANCE_ON_MARKER(markerPos_(2)) >= 2.0) {
 								control_mode_ = VELOCITY_MODE;
 							}
 						}
@@ -349,7 +351,8 @@ public:
 								desiredPos(2) =  mavPos_(2);
 							}
 
-							if (mavPos_(2) < 3.0) {
+							// if (mavPos_(2) < 2.0) {
+							if (DISTANCE_ON_MARKER(markerPos_(2)) < 2.0) {
 								control_mode_ = POSITION_MODE;
 							}
 
@@ -369,8 +372,8 @@ public:
 						break;
 				}
 
-				/* next time will check by z in camera frame */
-				if (mavPos_(2) < 0.7) {
+				/* Check by z axis in camera frame */
+				if (DISTANCE_ON_MARKER(markerPos_(2)) < 0.7 && startLanding) {
 					node_state = LANDED;
 				}
 
@@ -393,6 +396,7 @@ public:
 				}
 
 				cmdloop_timer_.stop();
+				statusloop_timer_.stop();
 			}
 			break;
 
@@ -410,10 +414,10 @@ public:
 
 	void markerposeCallback(const geometry_msgs::PoseStamped &msg){
 
-		Eigen::Vector3d markerAndCam;
-		/* Marker ----> Drone */
-		markerAndCam << msg.pose.position.x, msg.pose.position.y, msg.pose.position.z;
-		markerPos_ = cam2drone_matrix_ * markerAndCam;
+		Eigen::Vector3d markerInCamFrame;
+		/* Marker ----> Drone Frame*/
+		markerInCamFrame << msg.pose.position.x, msg.pose.position.y, msg.pose.position.z;
+		markerPos_ = cam2drone_matrix_ * markerInCamFrame;
 		ROS_INFO_STREAM("Distance to Marker: " << markerPos_);
 		// received_marker_pose =true;
 		// std::cout << "point des" << point_des << std::endl;

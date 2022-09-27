@@ -503,13 +503,25 @@ Eigen::Matrix4d TagDetector::getRelativeTransform(
   cv::solvePnP(objectPoints, imagePoints, cameraMatrix, distCoeffs, rvec, tvec);
   cv::Matx33d R;
   cv::Rodrigues(rvec, R);
-  Eigen::Matrix3d wRo;
+  Eigen::Matrix3d wRo, wRo1, roZ90;
+  roZ90 << 0.0000000, 1.0000000,  0.0000000, -1.0000000,  0.0000000,  0.0000000, 0.0000000,  0.0000000,  1.0000000;
   wRo << R(0,0), R(0,1), R(0,2), R(1,0), R(1,1), R(1,2), R(2,0), R(2,1), R(2,2);
+  wRo1 = wRo*roZ90;
+  // std::cout << "AprilTag Transtation: " << tvec << std::endl;
+  // std::cout << "AprilTag Rotation: " << std::endl;
+  // std::cout << wRo1 << std::endl;
+
   Eigen::Matrix4d T; // homogeneous transformation matrix
   T.topLeftCorner(3, 3) = wRo;
   T.col(3).head(3) <<
       tvec.at<double>(0), tvec.at<double>(1), tvec.at<double>(2);
   T.row(3) << 0,0,0,1;
+
+  // std::cout << "AprilTag Transtation Inverse: " << std::endl;
+  // Eigen::Matrix3d inverM = wRo1.inverse();
+  // Eigen::Vector3d v4dPoint (tvec.at<double>(0), tvec.at<double>(1), tvec.at<double>(2));
+  // std::cout << wRo1 * v4dPoint << std::endl;
+
   return T;
 }
 

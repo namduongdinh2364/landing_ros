@@ -40,10 +40,10 @@ file(GLOB SOURCES
                 src/detector_switch.cpp
 )
 
-file(GLOB SOURCES_1
-                src/transform_adaption_node.cpp
-                src/transform_adaption.cpp
-)
+# file(GLOB SOURCES_1
+#                 src/transform_adaption_node.cpp
+#                 src/transform_adaption.cpp
+# )
 
 file(GLOB SOURCES_2
                 src/aruco_detector.cpp
@@ -52,8 +52,8 @@ file(GLOB SOURCES_2
 add_executable(${PROJECT_NAME}_node ${SOURCES})
 target_link_libraries(${PROJECT_NAME}_node ${catkin_LIBRARIES})
 
-add_executable(transform_adaption_node ${SOURCES_1})
-target_link_libraries(transform_adaption_node ${catkin_LIBRARIES})
+# add_executable(transform_adaption_node ${SOURCES_1})
+# target_link_libraries(transform_adaption_node ${catkin_LIBRARIES})
 
 add_executable(aruco_detector_node ${SOURCES_2})
 target_link_libraries(aruco_detector_node ${catkin_LIBRARIES})

@@ -1,6 +1,6 @@
 <launch>
   <include file="$(find apriltag_ros)/launch/continuous_detection.launch"></include>
-  <node pkg="detector_switch_ros" type="detector_switch_ros_node" name="detector_switch" output="screen"> </node>
-  <node pkg="detector_switch_ros" type="aruco_detector_node" name="aruco_detector"> </node>
+  <node pkg="detector_switch_ros" type="detector_switch_ros_node" name="detector_switch"> </node>
+  <node pkg="detector_switch_ros" type="aruco_detector_node" name="aruco_detector" output="screen"> </node>
   <!-- <include file="$(find whycon)/launch/whycon.launch"></include> -->
 </launch>

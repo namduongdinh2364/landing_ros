@@ -26,9 +26,9 @@ DetectorSwitch::DetectorSwitch(const ros::NodeHandle& nh, const ros::NodeHandle&
 	sub_tf_whycon_ = nh_.subscribe
 		("/whycon/camera/pose", 1, &DetectorSwitch::getPoseWhyconCallback, this, ros::TransportHints().tcpNoDelay());
 
-	pose_loop_ = nh_.createTimer(ros::Duration(0.1), &DetectorSwitch::pubPoseCallback, this);
+	pose_loop_ = nh_.createTimer(ros::Duration(0.05), &DetectorSwitch::pubPoseCallback, this);
 
-	stable_loop_ = nh_.createTimer(ros::Duration(0.2), &DetectorSwitch::stableCheckCallback, this);
+	stable_loop_ = nh_.createTimer(ros::Duration(0.1), &DetectorSwitch::stableCheckCallback, this);
 
 	start_land_service_ = nh_.advertiseService("start_land_1", &DetectorSwitch::landCallback, this);
 
@@ -111,7 +111,7 @@ void DetectorSwitch::pubPoseCallback(const ros::TimerEvent& event)
 	}
 
 	if (!detected_whycon && !detected_aruco && !detected_apriltag) {
-		ROS_WARN("Marker is NOT detected");
+		// ROS_WARN("Marker is NOT detected");
 		return;
 	}
 
@@ -126,7 +126,7 @@ void DetectorSwitch::pubPoseCallback(const ros::TimerEvent& event)
 		
 		range1 = max_height* tan(ANGLE_1*PI/180);
 		range2 = max_height* tan(ANGLE_1*PI/180) *2 / 3;
-		range3 = max_height* tan(ANGLE_1*PI/180) *1 / 3;
+		range3 = max_height* tan(ANGLE_3*PI/180) *1 / 3;
 		// std::cout << max_height << std::endl;
 		// std::cout << "false" << std::endl;
 	}
