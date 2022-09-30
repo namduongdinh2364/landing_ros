@@ -52,26 +52,47 @@ public:
 			distCoeffs.at<double>(0,i) = 0.0;
 		}
 		vector<Point3f> points_id3, points_id4, points_id5, points_id6;
+		// // points ID 3
+		// points_id3.push_back(Point3f(-0.125, 0.4, 0.0));
+		// points_id3.push_back(Point3f(0.125, 0.4, 0.0));
+		// points_id3.push_back(Point3f(0.125, 0.15, 0.0));
+		// points_id3.push_back(Point3f(-0.125, 0.15, 0.0));
+		// // points ID 4
+		// points_id4.push_back(Point3f(0.15, 0.125, 0.0));
+		// points_id4.push_back(Point3f(0.4, 0.125, 0.0));
+		// points_id4.push_back(Point3f(0.4, -0.125, 0.0));
+		// points_id4.push_back(Point3f(0.15, -0.125, 0.0));
+		// // points ID 5
+		// points_id5.push_back(Point3f(-0.125, -0.15, 0.0));
+		// points_id5.push_back(Point3f(0.125, -0.15, 0.0));
+		// points_id5.push_back(Point3f(0.125, -0.4, 0.0));
+		// points_id5.push_back(Point3f(-0.125, -0.4, 0.0));
+		// // points ID 6
+		// points_id6.push_back(Point3f(-0.4, 0.125, 0.0));
+		// points_id6.push_back(Point3f(-0.15, 0.125, 0.0));
+		// points_id6.push_back(Point3f(-0.15, -0.125, 0.0));
+		// points_id6.push_back(Point3f(-0.4, -0.125, 0.0));
+
 		// points ID 3
-		points_id3.push_back(Point3f(-0.125, 0.4, 0.0));
-		points_id3.push_back(Point3f(0.125, 0.4, 0.0));
-		points_id3.push_back(Point3f(0.125, 0.15, 0.0));
-		points_id3.push_back(Point3f(-0.125, 0.15, 0.0));
+		points_id3.push_back(Point3f(-0.75, 0.75, 0.0));
+		points_id3.push_back(Point3f(-0.25, 0.75, 0.0));
+		points_id3.push_back(Point3f(-0.25, 0.25, 0.0));
+		points_id3.push_back(Point3f(-0.75, 0.25, 0.0));
 		// points ID 4
-		points_id4.push_back(Point3f(0.15, 0.125, 0.0));
-		points_id4.push_back(Point3f(0.4, 0.125, 0.0));
-		points_id4.push_back(Point3f(0.4, -0.125, 0.0));
-		points_id4.push_back(Point3f(0.15, -0.125, 0.0));
+		points_id4.push_back(Point3f(0.25, 0.75, 0.0));
+		points_id4.push_back(Point3f(0.75, 0.75, 0.0));
+		points_id4.push_back(Point3f(0.75, 0.25, 0.0));
+		points_id4.push_back(Point3f(0.25, 0.25, 0.0));
 		// points ID 5
-		points_id5.push_back(Point3f(-0.125, -0.15, 0.0));
-		points_id5.push_back(Point3f(0.125, -0.15, 0.0));
-		points_id5.push_back(Point3f(0.125, -0.4, 0.0));
-		points_id5.push_back(Point3f(-0.125, -0.4, 0.0));
+		points_id5.push_back(Point3f(0.25, -0.25, 0.0));
+		points_id5.push_back(Point3f(0.75, -0.25, 0.0));
+		points_id5.push_back(Point3f(0.75, -0.75, 0.0));
+		points_id5.push_back(Point3f(0.25, -0.75, 0.0));
 		// points ID 6
-		points_id6.push_back(Point3f(-0.4, 0.125, 0.0));
-		points_id6.push_back(Point3f(-0.15, 0.125, 0.0));
-		points_id6.push_back(Point3f(-0.15, -0.125, 0.0));
-		points_id6.push_back(Point3f(-0.4, -0.125, 0.0));
+		points_id6.push_back(Point3f(-0.75, -0.25, 0.0));
+		points_id6.push_back(Point3f(-0.25, -0.25, 0.0));
+		points_id6.push_back(Point3f(-0.25, -0.75, 0.0));
+		points_id6.push_back(Point3f(-0.75, -0.75, 0.0));
 
 		objPoints.push_back(points_id3);
 		objPoints.push_back(points_id4);

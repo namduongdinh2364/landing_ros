@@ -10,8 +10,10 @@
     <param name="inner_diameter" value="0.08"/> -->
     <param name="outer_diameter" value="0.3"/>
     <param name="inner_diameter" value="0.125"/>
+    <param name="max_attempts" value="2"/>
+    <param name="max_refine" value="2"/>
   </node>
-    <node name="whycon_uav" type="whycon_uav" pkg="whycon" output="screen"/>
-  <node name="transformer" type="transformer" pkg="whycon" output="screen"/>
+    <!-- <node name="whycon_uav" type="whycon_uav" pkg="whycon" output="screen"/> -->
+  <!-- <node name="transformer" type="transformer" pkg="whycon" output="screen"/> -->
 </launch>
   

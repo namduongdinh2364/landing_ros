@@ -31,8 +31,8 @@ whycon::WhyConROS::WhyConROS(ros::NodeHandle& n) : is_tracking(false), should_re
 	n.getParam("ratio_tolerance", parameters.ratio_tolerance);
 	n.getParam("max_eccentricity", parameters.max_eccentricity);
 
-	load_transforms();
-	transform_broadcaster = boost::make_shared<tf::TransformBroadcaster>();
+	// load_transforms();
+	// transform_broadcaster = boost::make_shared<tf::TransformBroadcaster>();
 
   /* initialize ros */
   int input_queue_size = 1;
@@ -75,13 +75,18 @@ void whycon::WhyConROS::on_image(const sensor_msgs::ImageConstPtr& image_msg, co
             targets = 4;
             system = boost::make_shared<whycon::LocalizationSystem>(targets, image.size().width, image.size().height, cv::Mat(camera_model.fullIntrinsicMatrix()), dis_coeff_temp, parameters);
         }
+        is_tracking = system->localize(image, should_reset/*!is_tracking*/, max_attempts, max_refine);
     }
 
   if (is_tracking) {
     publish_results(image_msg->header, cv_ptr);
     should_reset = false;
-    targets++;
-    system = boost::make_shared<whycon::LocalizationSystem>(targets, image.size().width, image.size().height, cv::Mat(camera_model.fullIntrinsicMatrix()), dis_coeff_temp, parameters);
+    if (targets < 4)
+    {
+      targets++;
+      system = boost::make_shared<whycon::LocalizationSystem>(targets, image.size().width, image.size().height, cv::Mat(camera_model.fullIntrinsicMatrix()), dis_coeff_temp, parameters);
+   
+    }
   }
   else if (image_pub.getNumSubscribers() != 0)
     image_pub.publish(cv_ptr);
@@ -154,49 +159,49 @@ void whycon::WhyConROS::publish_results(const std_msgs::Header& header, const cv
     poses_pub.publish(pose_array);
   }
 
-  if (transformation_loaded)
-  {
-	transform_broadcaster->sendTransform(tf::StampedTransform(similarity, header.stamp, world_frame_id, frame_id));
+  // if (transformation_loaded)
+  // {
+	// transform_broadcaster->sendTransform(tf::StampedTransform(similarity, header.stamp, world_frame_id, frame_id));
 
-	whycon::Projection projection_msg;
-	projection_msg.header = header;
-	for (size_t i = 0; i < projection.size(); i++) projection_msg.projection[i] = projection[i];
-	projection_pub.publish(projection_msg);
-  } 
+	// whycon::Projection projection_msg;
+	// projection_msg.header = header;
+	// for (size_t i = 0; i < projection.size(); i++) projection_msg.projection[i] = projection[i];
+	// projection_pub.publish(projection_msg);
+  // } 
 }
 
-void whycon::WhyConROS::load_transforms(void)
-{
-	std::string filename = frame_id + "_transforms.yml";
-	ROS_INFO_STREAM("Loading file " << filename);
+// void whycon::WhyConROS::load_transforms(void)
+// {
+// 	std::string filename = frame_id + "_transforms.yml";
+// 	ROS_INFO_STREAM("Loading file " << filename);
 
-	std::ifstream file(filename);
-	if (!file) {
-		ROS_WARN_STREAM("Could not load \"" << filename << "\"");
-		return;
-	}
+// 	std::ifstream file(filename);
+// 	if (!file) {
+// 		ROS_WARN_STREAM("Could not load \"" << filename << "\"");
+// 		return;
+// 	}
 
-	YAML::Node node = YAML::Load(file);
+// 	YAML::Node node = YAML::Load(file);
 
-	projection.resize(9);
-	for (int i = 0; i < 9; i++)
-		projection[i] = node["projection"][i].as<double>();
+// 	projection.resize(9);
+// 	for (int i = 0; i < 9; i++)
+// 		projection[i] = node["projection"][i].as<double>();
 
-	std::vector<double> similarity_origin(3);
-	for (int i = 0; i < 3; i++) similarity_origin[i] = node["similarity"]["origin"][i].as<double>();
+// 	std::vector<double> similarity_origin(3);
+// 	for (int i = 0; i < 3; i++) similarity_origin[i] = node["similarity"]["origin"][i].as<double>();
 
-	std::vector<double> similarity_rotation(4);
-	for (int i = 0; i < 4; i++) similarity_rotation[i] = node["similarity"]["rotation"][i].as<double>();
+// 	std::vector<double> similarity_rotation(4);
+// 	for (int i = 0; i < 4; i++) similarity_rotation[i] = node["similarity"]["rotation"][i].as<double>();
 
-	tf::Vector3 origin(similarity_origin[0], similarity_origin[1], similarity_origin[2]);
-	tf::Quaternion Q(similarity_rotation[0], similarity_rotation[1], similarity_rotation[2], similarity_rotation[3]);
+// 	tf::Vector3 origin(similarity_origin[0], similarity_origin[1], similarity_origin[2]);
+// 	tf::Quaternion Q(similarity_rotation[0], similarity_rotation[1], similarity_rotation[2], similarity_rotation[3]);
 
-	similarity.setOrigin(origin);
-	similarity.setRotation(Q);
+// 	similarity.setOrigin(origin);
+// 	similarity.setRotation(Q);
 
-	transformation_loaded = true;
+// 	transformation_loaded = true;
 
-	ROS_INFO_STREAM("Loaded transformation from \"" << filename <<  "\"");
-}
+// 	ROS_INFO_STREAM("Loaded transformation from \"" << filename <<  "\"");
+// }
 
 

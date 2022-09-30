@@ -28,6 +28,8 @@
 #include <std_srvs/SetBool.h>
 #include <std_msgs/Bool.h>
 
+#include "pid_controller/States.h"
+
 #include "pid.h"
 
 #define FACTORZ			0.1 // Descend Factor
@@ -60,9 +62,11 @@ private:
 	ros::NodeHandle nh_private_;
 	ros::Subscriber state_sub, imu_sub, local_position_sub;
 	ros::Subscriber marker_pose_sub, decrese_height_sub;
+	ros::Subscriber mavtwistSub_;
 	ros::Publisher cam_info_pub;
 	ros::Publisher velocity_pub, local_pos_pub, setRaw_pub;
 	ros::Publisher systemstatusPub_;
+	ros::Publisher kalman_pub;
 	ros::Time last_request_;
 	ros::Time lastTime;
 	ros::Timer cmdloop_timer_, statusloop_timer_;
@@ -72,6 +76,7 @@ private:
 	Eigen::Vector3d targetPos_, markerPos_, markerPosNEU_;
 	Eigen::Vector3d mavPos_;
 	Eigen::Vector4d mavAtt_;
+	Eigen::Vector3d mavVel_, mavRate_;
 
 	ros::ServiceServer return_home_service_, start_land_service_;
 
@@ -95,11 +100,13 @@ private:
 
 	geometry_msgs::Pose home_pose_;
 	bool received_home_pose;
-	double initTargetPos_x_, initTargetPos_y_, initTargetPos_z_;
+	double initTargetPos_x_, initTargetPos_y_, initTargetPos_z_, initYAW_;
 	int control_mode_;
+	pid_controller::States states;
 
 	PID* pidx;
 	PID* pidy;
+	PID* pidYAW;
 
 public:
 	Controller(const ros::NodeHandle& nh, const ros::NodeHandle& nh_private)
@@ -113,15 +120,20 @@ public:
 		nh_private_.param<double>("init_pos_x", initTargetPos_x_, 0.0);
 		nh_private_.param<double>("init_pos_y", initTargetPos_y_, 0.0);
 		nh_private_.param<double>("init_pos_z", initTargetPos_z_, 8.0);
+		nh_private_.param<double>("init_yaw", initYAW_, 0.0);
 		nh_private_.param<int>("control_mode", control_mode_, 0);
 
-		pidx = new PID(0.75, -0.75, 0.2, 0.00005, 0.0008); // max, min, kp, kd, ki
-		pidy = new PID(0.75, -0.75, 0.2, 0.00006, 0.00085);
+		pidx = new PID(0.75, -0.75, 0.2, 0.005, 0.0008); // max, min, kp, kd, ki
+		pidy = new PID(0.75, -0.75, 0.2, 0.005, 0.00085);
+		pidYAW = new PID(0.75, -0.75, 0.2, 0.01, 0.00085);
 
 		/** setup subscribe and public*/ 
 		local_position_sub = nh_.subscribe
 			("mavros/local_position/pose", 1, &Controller::mavrosPoseCallback, this, ros::TransportHints().tcpNoDelay());
-
+		
+		mavtwistSub_ = nh_.subscribe
+			("mavros/local_position/velocity_local", 1, &Controller::mavtwistCallback, this, ros::TransportHints().tcpNoDelay());
+		
 		state_sub = nh_.subscribe
 			("mavros/state", 10, &Controller::state_cb, this, ros::TransportHints().tcpNoDelay());
 
@@ -145,6 +157,9 @@ public:
 		systemstatusPub_ = nh_.advertise<mavros_msgs::CompanionProcessStatus>
 			("mavros/companion_process/status", 1);
 
+		kalman_pub = nh_.advertise<pid_controller::States>
+			("/kalman_states", 10);
+
 		cmdloop_timer_ = nh_.createTimer(ros::Duration(0.1), &Controller::cmdloopCallback, this);
 
 		statusloop_timer_ = nh_.createTimer(ros::Duration(1), &Controller::statusloopCallback, this);
@@ -159,10 +174,12 @@ public:
 		decrese_height_sub = nh_.subscribe
 			("/decrease_height", 1, &Controller::decreaseHeightCallback, this, ros::TransportHints().tcpNoDelay());
 
+
 		/* Rotation matrix from camera to UAV. It's customizable with different setup */
 		cam2drone_matrix_ << 0.0 , -1.0 , 0.0 , -1.0 , 0.0 , 0.0 , 0.0 , 0.0 , -1.0;
 		targetPos_ << initTargetPos_x_, initTargetPos_y_, initTargetPos_z_;
 		markerPos_ << 0.0, 0.0, 0.0;
+		mavVel_ << 0.0, 0.0, 0.0;
 
 	}
 
@@ -301,11 +318,20 @@ public:
 					pause.sleep();
 				}
 				ROS_INFO("Got pose! Drone Ready to be armed.");
+				/* Change state */
 				node_state = MISSION_EXECUTION;
 			}
 			break;
 
 			case MISSION_EXECUTION: {
+
+				// states.Xm = markerPos_(0);
+				// states.Ym = markerPos_(1);
+				// states.Vx = mavVel_(0);
+				// states.Vy = mavVel_(1);
+
+				// kalman_pub.publish(states);
+
 				switch (control_mode_)
 				{
 					case POSITION_MODE: {
@@ -339,6 +365,7 @@ public:
 					case VELOCITY_MODE: {
 						
 						Eigen::Vector3d desiredPos;
+
 						if (startLanding) {
 
 							desiredPos(0) = markerPos_(0);
@@ -353,6 +380,7 @@ public:
 
 							// if (mavPos_(2) < 2.0) {
 							if (DISTANCE_ON_MARKER(markerPos_(2)) < 2.0) {
+								/* Change control mode */
 								control_mode_ = POSITION_MODE;
 							}
 
@@ -418,21 +446,29 @@ public:
 		/* Marker ----> Drone Frame*/
 		markerInCamFrame << msg.pose.position.x, msg.pose.position.y, msg.pose.position.z;
 		markerPos_ = cam2drone_matrix_ * markerInCamFrame;
-		ROS_INFO_STREAM("Distance to Marker: " << markerPos_);
+
+		// ROS_INFO_STREAM("Distance to Marker: " << markerPos_);
 		// received_marker_pose =true;
 		// std::cout << "point des" << point_des << std::endl;
 	};
+
+	void mavtwistCallback(const geometry_msgs::TwistStamped &msg) {
+		mavVel_ = toEigen(msg.twist.linear);
+		mavRate_ = toEigen(msg.twist.angular);
+	}
 
 	void pubVelocityToFCU(const Eigen::Vector3d &target_position)
 	{
 		/* Setpoint, Process Variable, Sample time for Vx */
 		float Vx = 0.0;
 		float Vy = 0.0;
+		float Vyaw = 0.0;
 		double timeBetweenMarkers = (ros::Time::now() - lastTime).toSec();
 		lastTime = ros::Time::now();
 
 		Vx = (float) pidx->calculate(target_position(0), 0.0, timeBetweenMarkers);
 		Vy = (float) pidy->calculate(target_position(1), 0.0, timeBetweenMarkers);
+		Vyaw = (float) pidYAW->calculate(0, initYAW_, timeBetweenMarkers);
 
 		// ROS_INFO_STREAM("Desired velocity x: " << Vx);
 		// ROS_INFO_STREAM("Desired velocity y: " << Vy);
@@ -449,6 +485,7 @@ public:
 		pos.position.z = target_position(2);
 		pos.velocity.x = Vx;
 		pos.velocity.y = Vy;
+		// pos.yaw_rate = Vyaw;
 
 		setRaw_pub.publish(pos);
 

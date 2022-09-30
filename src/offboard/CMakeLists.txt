@@ -16,6 +16,18 @@ find_package(catkin REQUIRED COMPONENTS
   tf2_ros
   sensor_msgs
   cv_bridge
+  message_generation
+)
+
+add_message_files(
+  DIRECTORY msg
+  FILES
+  States.msg
+)
+
+generate_messages(
+  DEPENDENCIES
+  std_msgs
 )
 
 catkin_package(
@@ -37,6 +49,8 @@ include_directories(
     ${catkin_INCLUDE_DIRS}
     ${Eigen_INCLUDE_DIRS}
 )
+
+
 
 add_library(pid src/pid.cpp)
 
@@ -61,6 +75,9 @@ add_executable(landing_service
 )
 target_link_libraries(landing_service ${PROJECT_NAME} ${catkin_LIBRARIES})
 
+
+add_executable(kalman_node src/kalman.cpp)
+target_link_libraries(kalman_node ${catkin_LIBRARIES})
 
 # Build our plugin
 

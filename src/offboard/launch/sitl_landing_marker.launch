@@ -18,6 +18,7 @@
         <param name="init_pos_x" value="1.0"/>
         <param name="init_pos_y" value="1.0"/>
         <param name="init_pos_z" value="6.0"/>
+        <param name="init_yaw" value="1.0"/>
         <param name="control_mode" value="4"/>
     </node>
 
