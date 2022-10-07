@@ -36,7 +36,7 @@ class Kalman
             // Subscriber to /states topic from object_detector/States
             sub = po_nh.subscribe("/kalman_states", 10, &Kalman::predictionsDetectedCallback, this); 
             // Delta of time for the transition matrix
-            this->dt = 0.1;
+            this->dt = 0.5;
             this->first_iter = 0;
 
 
@@ -63,9 +63,9 @@ class Kalman
             this->Kg = MatrixXd::Zero(4,4); 
 
             // State transition matrix initialization
-            this->A << 1.0, dt, 0.0, 0.0, 
+            this->A << 1.0, -dt, 0.0, 0.0, 
                         0.0, 1.0, 0.0, 0.0, 
-                        0.0, 0.0, 1.0, dt,
+                        0.0, 0.0, 1.0, -dt,
                         0.0, 0.0, 0.0, 1.0;
 
             // Observation model initialization
@@ -89,8 +89,8 @@ class Kalman
             if(this->first_iter==0)
             {
                 this->X(0,0) = msg.Xm; // x
-                this->X(1,0) = msg.Ym; // y
-                this->X(2,0) = 0; // x'
+                this->X(1,0) = 0; // y
+                this->X(2,0) = msg.Ym; // x'
                 this->X(3,0) = 0; // y'
                 this->first_iter = 1;
             }
@@ -101,8 +101,8 @@ class Kalman
 
             // Update step, assign the observations to the measurement vector 
             measurement(0,0) = msg.Xm;
-            measurement(1,0) = msg.Ym;
-            measurement(2,0) = msg.Vx;
+            measurement(1,0) = msg.Vx;
+            measurement(2,0) = msg.Ym;
             measurement(3,0) = msg.Vy;
 
             // If there is a valid measurement (the detector found the coordinates)
@@ -119,10 +119,10 @@ class Kalman
 
             // Assign the predictions to the publisher object
             predictions.Xm = this->X(0,0);
-            predictions.Ym = this->X(1,0);
-            predictions.Vx = this->X(2,0);
+            predictions.Ym = this->X(2,0);
+            predictions.Vx = this->X(1,0);
             predictions.Vy = this->X(3,0);
-            std::cout << "===" << predictions << std::endl;
+            std::cout << "===\n" << predictions << std::endl;
             pub.publish(predictions);
         }
 };

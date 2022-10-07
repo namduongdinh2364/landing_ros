@@ -26,7 +26,7 @@ DetectorSwitch::DetectorSwitch(const ros::NodeHandle& nh, const ros::NodeHandle&
 	sub_tf_whycon_ = nh_.subscribe
 		("/whycon/camera/pose", 1, &DetectorSwitch::getPoseWhyconCallback, this, ros::TransportHints().tcpNoDelay());
 
-	pose_loop_ = nh_.createTimer(ros::Duration(0.05), &DetectorSwitch::pubPoseCallback, this);
+	pose_loop_ = nh_.createTimer(ros::Duration(0.5), &DetectorSwitch::pubPoseCallback, this);
 
 	stable_loop_ = nh_.createTimer(ros::Duration(0.1), &DetectorSwitch::stableCheckCallback, this);
 
@@ -101,7 +101,7 @@ void DetectorSwitch::pubPoseCallback(const ros::TimerEvent& event)
 	if((TIME_NOW - last_time_aruco_) > TIME_DURATION(1.0)) {
 		detected_aruco = false;
 		numStableAru = 0;
-		// ROS_WARN_STREAM("Aruco is unstable");
+		ROS_WARN_STREAM("Aruco is unstable");
 	}
 
 	if((TIME_NOW - last_time_apriltag_) > TIME_DURATION(1.0)) {

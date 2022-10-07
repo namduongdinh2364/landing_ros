@@ -15,13 +15,15 @@ class PID
 
     public:
         // Class constructor
-        PID(double cmax, double cmin, double ckp, double ckd, double cki);
+        PID(double cmax, double cmin, double ckp, double cki, double ckd);
         // Compute PID output
-        double calculate( double setpoint, double pv, double cdt);
+        double calculate( double setpoint, double pv, double cdt, double *pout, double *iout, double *dout);
+        void setP(double value);
+        void setI(double value);
+        void setD(double value);
         // Class destructor
         ~PID();
 
-    
 };
 
 #endif

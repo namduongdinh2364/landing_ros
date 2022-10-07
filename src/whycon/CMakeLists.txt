@@ -68,8 +68,8 @@ target_link_libraries(whycon ${OpenCV_LIBS} ${Boost_LIBRARIES})
 
 if(NOT DISABLE_ROS)
 
-    add_executable(whycon_uav src/ros/whycon_uav_node.cpp src/ros/whycon_uav_ros.cpp)
-    set_target_properties(whycon_uav PROPERTIES OUTPUT_NAME whycon_uav)
+  add_executable(whycon_uav src/ros/whycon_uav_node.cpp src/ros/whycon_uav_ros.cpp)
+  set_target_properties(whycon_uav PROPERTIES OUTPUT_NAME whycon_uav)
 
   add_executable(whycon-node src/ros/whycon_node.cpp src/ros/whycon_ros.cpp)
   set_target_properties(whycon-node PROPERTIES OUTPUT_NAME whycon)

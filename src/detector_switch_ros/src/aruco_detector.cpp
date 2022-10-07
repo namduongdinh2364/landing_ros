@@ -44,7 +44,7 @@ public:
 		pose_pub = nh.advertise<geometry_msgs::PoseStamped>("pose", 10);
 		nh.param<std::string>("reference_frame", reference_frame, "aruco");
 
-		cameraMatrix = Mat(1, 9, CV_64F);
+		cameraMatrix = Mat(3, 3, CV_64FC1);
 		distCoeffs = Mat(1, 5, CV_64F);
 		int i;
 		for (i = 0; i < 5; i++)
@@ -134,14 +134,16 @@ public:
 				// if at least one marker detected
 				if(markerIds.size() > 0) {
 					cv::Mat rvec, tvec;
-					int valid = cv::aruco::estimatePoseBoard(markerCorners,
-															 markerIds,
-															 board, 
-															 cameraMatrix, 
-															 distCoeffs, 
-															 rvec, 
-															 tvec);
-					if (valid) {
+					std::vector<cv::Vec3d> rvecs, tvecs;
+					cv::aruco::estimatePoseSingleMarkers(markerCorners, 0.75, cameraMatrix, distCoeffs, rvec, tvec);
+					// int valid = cv::aruco::estimatePoseBoard(markerCorners,
+					// 										 markerIds,
+					// 										 board, 
+					// 										 cameraMatrix, 
+					// 										 distCoeffs, 
+					// 										 rvec, 
+					// 										 tvec);
+					// if (valid) {
 						geometry_msgs::PoseStamped poseMsg;
 						poseMsg.header.frame_id = reference_frame;
 						poseMsg.header.stamp = curr_stamp;
@@ -149,7 +151,6 @@ public:
 						poseMsg.pose.position.y = tvec.at<double>(1);
 						poseMsg.pose.position.z = tvec.at<double>(2);
 						pose_pub.publish(poseMsg);
-					}
 					
 					// std::cout << "tvec: " << tvec << std::endl;
 
@@ -164,7 +165,17 @@ public:
 					// Eigen::Vector3d v3dPoint (tvec.at<double>(2), tvec.at<double>(0), tvec.at<double>(1));
 					// v3dPoint << tvec.at<double>(0), tvec.at<double>(1), tvec.at<double>(2);
 					// std::cout << "Marker Frame: " << inverM* v3dPoint << std::endl;
+					// cv::Mat imageCopy;
+					// inImage.copyTo(imageCopy);
+					// 	std::ostringstream ostr;
+					// 	ostr << std::fixed << std::setprecision(2);
+					// 	ostr << "[Aruco] :"<<" x: " << (poseMsg.pose.position.x * 100) /100
+					// 	<<" y: " << (poseMsg.pose.position.y * 100) /100 << " z: " << (poseMsg.pose.position.z * 100) /100;
 
+					// 	cv::putText(inImage, ostr.str(), cv::Point(100 , 100), cv::FONT_HERSHEY_DUPLEX, 1.0, CV_RGB(26,249,249), 1.0);
+					// 	// for(int i=0; i<markerIds.size(); i++)
+					// 		cv::drawFrameAxes(inImage, cameraMatrix, distCoeffs, rvec, tvec, 1.0, 2);
+					// // }
 					if (image_pub.getNumSubscribers() > 0)
 					{
 						// show input with augmented information
@@ -187,14 +198,16 @@ public:
 	// wait for one camerainfo, then shut down that subscriber
 	void cam_info_callback(const sensor_msgs::CameraInfo &msg)
 	{
-		int i;
+		cameraMatrix.at<double>(0, 0) = msg.K[0];
+		cameraMatrix.at<double>(0, 1) = msg.K[1];
+		cameraMatrix.at<double>(0, 2) = msg.K[2];
+		cameraMatrix.at<double>(1, 0) = msg.K[3];
+		cameraMatrix.at<double>(1, 1) = msg.K[4];
+		cameraMatrix.at<double>(1, 2) = msg.K[5];
+		cameraMatrix.at<double>(2, 0) = msg.K[6];
+		cameraMatrix.at<double>(2, 1) = msg.K[7];
+		cameraMatrix.at<double>(2, 2) = msg.K[8];
 
-		for (i = 0; i < 9; i++) {
-			cameraMatrix.at<double>(0, i) = msg.K[i];
-			// std::cout << cameraMatrix.at<float>(0, i) << "---"<< std::endl;
-			// cameraMatrix.push_back(msg.K[i]);
-		}
-		cameraMatrix = cameraMatrix.reshape(3, 3);
 		cam_info_received = true;
 		std::cout << "Get cameraMaxtrix done!!!" << std::endl;
 		cam_info_sub.shutdown();

@@ -8,6 +8,7 @@ add_compile_options(-std=c++11)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
+  dynamic_reconfigure
   roscpp
   rospy
   std_msgs
@@ -23,6 +24,10 @@ add_message_files(
   DIRECTORY msg
   FILES
   States.msg
+)
+
+generate_dynamic_reconfigure_options(
+  cfg/pidcontroller.cfg
 )
 
 generate_messages(
@@ -68,6 +73,7 @@ add_library(${PROJECT_NAME}
 
 file(GLOB SOURCES src/offboard_control.cpp src/pid.cpp)
 add_executable(pid_controller_node src/offboard_control.cpp src/pid.cpp)
+add_dependencies(pid_controller_node ${PROJECT_NAME}_gencfg)
 target_link_libraries(pid_controller_node ${catkin_LIBRARIES} pid_controller)
 
 add_executable(landing_service

@@ -21,7 +21,8 @@
 #   ]
 standalone_tags:
   [
-    {id: 24, size: 0.1666 , name: apriltag_bundle},
+    # {id: 24, size: 0.1666 , name: apriltag_bundle},
+    {id: 42, size: 0.19445 , name: apriltag_bundle},
   ]
 # ## Tag bundle definitions
 # ### Remarks
